@@ -17,12 +17,5 @@ public class Main {
         SpringApplication.run(Main.class,args);
     }
 
-    @Bean
-    public MybatisPlusInterceptor mybatisPlusInterceptor(){
-        MybatisPlusInterceptor interceptor=new MybatisPlusInterceptor();
-        interceptor.addInnerInterceptor(new BlockAttackInnerInterceptor());
-        interceptor.addInnerInterceptor(new PaginationInnerInterceptor());
-        interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
-        return interceptor;
-    }
+
 }

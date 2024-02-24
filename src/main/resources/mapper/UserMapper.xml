@@ -6,14 +6,18 @@
 
     <resultMap id="BaseResultMap" type="edu.whut.pojo.User">
             <id property="uid" column="uid" jdbcType="INTEGER"/>
-            <result property="username" column="username" jdbcType="VARCHAR"/>
+            <result property="userName" column="user_name" jdbcType="VARCHAR"/>
             <result property="userPwd" column="user_pwd" jdbcType="VARCHAR"/>
             <result property="version" column="version" jdbcType="INTEGER"/>
             <result property="isDeleted" column="is_deleted" jdbcType="INTEGER"/>
+            <result property="userNickname" column="user_nickname" jdbcType="VARCHAR"/>
+            <result property="loginIp" column="login_ip" jdbcType="VARCHAR"/>
+            <result property="loginTime" column="login_time" jdbcType="TIMESTAMP"/>
     </resultMap>
 
     <sql id="Base_Column_List">
-        uid,username,user_pwd,
-        version,is_deleted
+        uid,user_name,user_pwd,
+        version,is_deleted,user_nickname,
+        login_ip,login_time
     </sql>
 </mapper>
