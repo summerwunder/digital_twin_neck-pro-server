@@ -1,6 +1,8 @@
 package edu.whut.config.security;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import edu.whut.domain.vo.LoginUserVO;
 import edu.whut.mapper.UserMapper;
 import edu.whut.pojo.User;
@@ -20,14 +22,17 @@ public class SysUserServiceDetail implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         LoginUserVO loginUser=new LoginUserVO();
-        // 根据账号查询用户，同时将角色查出来，联查时最好不要超过3张表
+        // 根据账号查询用户
         LambdaQueryWrapper<User> queryWrapper=new LambdaQueryWrapper<>();
         queryWrapper.eq(User::getUserName,username);
         User user = userMapper.selectOne(queryWrapper);
         log.info("sysUser=========>{}",user);
-        loginUser.setSysUser(user);
-        loginUser.setId(user.getUid());
-        loginUser.setToken(null);
-        return loginUser;
+        if(ObjectUtil.isNotNull(user)){
+            loginUser.setSysUser(user);
+            loginUser.setId(user.getUid());
+            loginUser.setToken(null);
+            return loginUser;
+        }
+        return null;
     }
 }

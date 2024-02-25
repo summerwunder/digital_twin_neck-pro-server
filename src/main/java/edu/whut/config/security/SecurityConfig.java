@@ -1,6 +1,7 @@
 package edu.whut.config.security;
 
 import edu.whut.config.filter.AuthicationFilter;
+import edu.whut.config.security.handler.AuthEntryHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +13,6 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -26,6 +26,8 @@ public class SecurityConfig {
     private SysUserServiceDetail userServiceDetail;
     @Autowired
     private AuthicationFilter authicationFilter;
+    @Autowired
+    private AuthEntryHandler authEntryHandler;
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(
@@ -44,6 +46,11 @@ public class SecurityConfig {
         http.cors(Customizer.withDefaults());
         //插入过滤器
         http.addFilterBefore(authicationFilter, UsernamePasswordAuthenticationFilter.class);
+        //自定义处理器
+        http.exceptionHandling(exceptionHandling -> exceptionHandling
+                .authenticationEntryPoint(authEntryHandler) //处理用户未登录（未携带token）
+        );
+
         return http.build();
     }
 

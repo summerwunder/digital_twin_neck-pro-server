@@ -1,6 +1,8 @@
 package edu.whut.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
+import com.baomidou.mybatisplus.extension.conditions.update.LambdaUpdateChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import edu.whut.config.security.SysUserServiceDetail;
 import edu.whut.constants.HttpStatus;
@@ -11,6 +13,8 @@ import edu.whut.pojo.User;
 import edu.whut.service.UserService;
 import edu.whut.mapper.UserMapper;
 import edu.whut.utils.JwtHelper;
+import edu.whut.utils.ip.IpUtil;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -19,6 +23,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
@@ -35,8 +40,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     private AuthenticationManager authenticationManager;
     @Autowired
     private JwtHelper jwtHelper;
+    @Autowired
+    private UserMapper userMapper;
     @Override
-    public String checkUserPwd(LoginUserDTO loginUser) {
+    public String checkUserPwd(LoginUserDTO loginUser, HttpServletRequest request) {
         UsernamePasswordAuthenticationToken authentication
                 =new UsernamePasswordAuthenticationToken
                    (loginUser.getUserName(),loginUser.getUserPwd());
@@ -45,17 +52,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         SecurityContextHolder.getContext().setAuthentication(authenticate);
         log.info("principal------------>",principal);
         // 根据loginUser创建token
-        if(ObjectUtil.isNull(loginUser)) {
+        if(ObjectUtil.isNull(principal)) {
             throw new ServiceException(HttpStatus.UNAUTHORIZED,"认证失败！");
         }
         // 创建token,此处的token时由UUID编码而成JWT字符串
-        //TODO 返回token
+        // 返回token
         String token =
                 jwtHelper.createToken(UUID.randomUUID().toString().replace("-", ""));
         principal.setToken(token);
         jwtHelper.refreshRedisToken(principal);
         //String token = jwtUtils.createToken(loginUser);
         //log.info("token===》{}",token);
+        //更新ip和登陆时间
+        User updateUser=new User();
+        updateUser.setLoginIp(IpUtil.getIp(request));
+        updateUser.setLoginTime(LocalDateTime.now());
+        LambdaUpdateWrapper<User> wrapper=
+                new LambdaUpdateWrapper<>();
+        wrapper.eq(User::getUserName,
+                principal.getSysUser().getUserName());
+        userMapper.update(updateUser,wrapper);
         return token;
     }
 }

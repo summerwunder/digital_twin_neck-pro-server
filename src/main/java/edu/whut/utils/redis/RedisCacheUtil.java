@@ -1,4 +1,4 @@
-package edu.whut.utils.utils;
+package edu.whut.utils.redis;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.BoundSetOperations;

@@ -1,30 +1,22 @@
 package edu.whut.utils;
 
-import cn.hutool.cache.Cache;
 import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.druid.util.StringUtils;
 import edu.whut.constants.CacheConstants;
 import edu.whut.constants.ConnectConstants;
-import edu.whut.constants.HttpStatus;
 import edu.whut.domain.vo.LoginUserVO;
-import edu.whut.exception.ServiceException;
-import edu.whut.utils.utils.RedisCacheUtil;
+import edu.whut.utils.redis.RedisCacheUtil;
 import io.jsonwebtoken.*;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.stereotype.Component;
 
-import java.rmi.ServerException;
-import java.time.Duration;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @Data
@@ -93,7 +85,6 @@ public class JwtHelper {
                 String uuid = getUuid(token);
                 redisCacheUtil.getCacheObject(CacheConstants.LOGIN_USER_KEY+token);
             }
-
             // 从redis中获取数据
             LoginUserVO loginUserVO = redisCacheUtil.getCacheObject(CacheConstants.LOGIN_USER_KEY + token);
             log.info("[getLoginUser]loginUserVo---------->{}",loginUserVO);
