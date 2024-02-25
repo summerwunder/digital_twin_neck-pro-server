@@ -1,5 +1,6 @@
 package edu.whut.service.impl;
 
+import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.conditions.update.LambdaUpdateChainWrapper;
@@ -8,12 +9,14 @@ import edu.whut.config.security.SysUserServiceDetail;
 import edu.whut.constants.HttpStatus;
 import edu.whut.domain.dto.LoginUserDTO;
 import edu.whut.domain.vo.LoginUserVO;
+import edu.whut.domain.vo.UserInfoVO;
 import edu.whut.exception.ServiceException;
 import edu.whut.pojo.User;
 import edu.whut.service.UserService;
 import edu.whut.mapper.UserMapper;
 import edu.whut.utils.JwtHelper;
 import edu.whut.utils.ip.IpUtil;
+import edu.whut.utils.security.SecurityUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +24,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -61,8 +65,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
                 jwtHelper.createToken(UUID.randomUUID().toString().replace("-", ""));
         principal.setToken(token);
         jwtHelper.refreshRedisToken(principal);
-        //String token = jwtUtils.createToken(loginUser);
-        //log.info("token===》{}",token);
         //更新ip和登陆时间
         User updateUser=new User();
         updateUser.setLoginIp(IpUtil.getIp(request));
@@ -73,6 +75,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
                 principal.getSysUser().getUserName());
         userMapper.update(updateUser,wrapper);
         return token;
+    }
+
+    @Override
+    public UserInfoVO getUserInfo() {
+        Integer id= SecurityUtil.getUserId();
+        User user = userMapper.selectById(id);
+        if(ObjectUtil.isNull(user)){
+            throw new ServiceException(HttpStatus.FORBIDDEN,"");
+        }
+        //将用户的部分数据传输到用户信息表中
+        UserInfoVO userInfoVO = new UserInfoVO();
+        BeanUtil.copyProperties(user,userInfoVO);
+        return userInfoVO;
     }
 }
 

@@ -29,7 +29,7 @@ public class User implements Serializable {
 
     private String loginIp;
 
-    @TableField(fill = FieldFill.UPDATE)
+    //@TableField(fill = FieldFill.UPDATE)
     private LocalDateTime loginTime;
 
     private static final long serialVersionUID = 1L;

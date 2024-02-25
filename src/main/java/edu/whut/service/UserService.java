@@ -2,6 +2,7 @@ package edu.whut.service;
 
 import edu.whut.domain.dto.LoginUserDTO;
 import edu.whut.domain.vo.LoginUserVO;
+import edu.whut.domain.vo.UserInfoVO;
 import edu.whut.pojo.User;
 import com.baomidou.mybatisplus.extension.service.IService;
 import edu.whut.response.Result;
@@ -15,4 +16,6 @@ import jakarta.servlet.http.HttpServletRequest;
 public interface UserService extends IService<User> {
 
     String checkUserPwd(LoginUserDTO loginUser, HttpServletRequest request);
+
+    UserInfoVO getUserInfo();
 }

@@ -3,6 +3,7 @@ package edu.whut.controller;
 import edu.whut.constants.HttpStatus;
 import edu.whut.domain.dto.LoginUserDTO;
 import edu.whut.domain.vo.LoginUserVO;
+import edu.whut.domain.vo.UserInfoVO;
 import edu.whut.response.Result;
 import edu.whut.service.UserService;
 import jakarta.servlet.http.HttpServletRequest;
@@ -22,7 +23,7 @@ public class UserController {
     private UserService userService;
     @PostMapping("login")
     public Result getLoginInfo(@RequestBody LoginUserDTO loginUser, HttpServletRequest request){
-        log.info("login---------->{}",loginUser);
+        //log.info("login---------->{}",loginUser);
         String token= null;
         try {
             token = userService.checkUserPwd(loginUser,request);
@@ -34,9 +35,10 @@ public class UserController {
         return Result.success("登录成功",map);
     }
 
-    @PostMapping("test")
-    public Result testSecurity(@RequestBody LoginUserDTO loginUser){
-        //return userService.checkUserPwd(loginUser);
-        return Result.success("fine");
+    @GetMapping("info")
+    public Result getUserInfo(){
+        //获取用户信息
+        UserInfoVO loginUser=userService.getUserInfo();
+        return Result.success("成功获取用户信息",loginUser);
     }
 }
