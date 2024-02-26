@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.whut.mapper.DevicesMapper">
+
+    <resultMap id="BaseResultMap" type="edu.whut.pojo.Devices">
+            <id property="did" column="did" jdbcType="INTEGER"/>
+            <result property="dNumber" column="d_number" jdbcType="VARCHAR"/>
+            <result property="dName" column="d_name" jdbcType="VARCHAR"/>
+            <result property="dMark" column="d_mark" jdbcType="VARCHAR"/>
+            <result property="dStatus" column="d_status" jdbcType="INTEGER"/>
+            <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+            <result property="dIp" column="d_ip" jdbcType="VARCHAR"/>
+            <result property="version" column="version" jdbcType="INTEGER"/>
+            <result property="isDeleted" column="is_deleted" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        did,d_number,d_name,
+        d_mark,d_status,create_time,
+        update_time,d_ip,version,
+        is_deleted
+    </sql>
+
+
+    <select id="selectListByRules" resultType="edu.whut.pojo.Devices">
+        SELECT * FROM t_devices
+        <where>
+            t_devices.is_deleted = 0
+            <if test="dName != null or dIp != null">
+                AND
+                <if test="dName != null">
+                    dName = #{dName}
+                </if>
+                <if test="dIp != null">
+                    AND dIp = #{dIp}
+                </if>
+            </if>
+        </where>
+        ORDER BY
+         d_status = 1 ASC
+        ,update_time DESC
+    </select>
+</mapper>

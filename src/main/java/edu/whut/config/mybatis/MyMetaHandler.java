@@ -10,7 +10,7 @@ public class MyMetaHandler implements MetaObjectHandler {
     @Override
     public void insertFill(MetaObject metaObject) {
         LocalDateTime now=LocalDateTime.now();
-        //this.strictInsertFill(metaObject, "addTime", () -> now, LocalDateTime.class);
+        this.strictInsertFill(metaObject, "createTime", () -> now, LocalDateTime.class);
     }
 
     @Override
