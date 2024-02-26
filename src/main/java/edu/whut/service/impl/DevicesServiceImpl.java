@@ -60,22 +60,11 @@ public class DevicesServiceImpl extends ServiceImpl<DevicesMapper, Devices>
             BeanUtils.copyProperties(source, target);
             listReturn.add(target);
         }
-        log.info("listRetrun====>{}"+listReturn);
+        //log.info("listRetrun====>{}"+listReturn);
         PageResult<QueryDeviceVO> pageResult
                 =new PageResult<>(listReturn,rowPage.getTotal());
 
         return pageResult;
-
-/*
-        List<Devices> list=devicesMapper.selectListByRules(
-                    queryDevice.getDeviceName(),queryDevice.getLoginIp());
-        List<QueryDeviceVO> listReturn = new ArrayList<>();
-        for (Devices source : list) {
-            QueryDeviceVO target = new QueryDeviceVO();
-            BeanUtils.copyProperties(source, target);
-            listReturn.add(target);
-        }
-        return listReturn;*/
     }
 }
 

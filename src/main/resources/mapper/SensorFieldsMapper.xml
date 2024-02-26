@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.whut.mapper.SensorFieldsMapper">
+
+    <resultMap id="BaseResultMap" type="edu.whut.pojo.SensorFields">
+            <id property="nid" column="nid" jdbcType="INTEGER"/>
+            <result property="nName" column="n_name" jdbcType="VARCHAR"/>
+            <result property="nUnit" column="n_unit" jdbcType="VARCHAR"/>
+            <result property="nDescription" column="n_description" jdbcType="VARCHAR"/>
+            <result property="isAlter" column="is_alter" jdbcType="INTEGER"/>
+            <result property="alterTop" column="alter_top" jdbcType="DOUBLE"/>
+            <result property="alterDown" column="alter_down" jdbcType="DOUBLE"/>
+            <result property="alterDescription" column="alter_description" jdbcType="VARCHAR"/>
+            <result property="alterIntensity" column="alter_intensity" jdbcType="INTEGER"/>
+            <result property="version" column="version" jdbcType="INTEGER"/>
+            <result property="isDeleted" column="is_deleted" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        nid,n_name,n_unit,
+        n_description,is_alter,alter_top,
+        alter_down,alter_description,alter_intensity,
+        version,is_deleted
+    </sql>
+</mapper>

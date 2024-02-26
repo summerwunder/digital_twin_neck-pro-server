@@ -87,7 +87,7 @@ public class JwtHelper {
             }
             // 从redis中获取数据
             LoginUserVO loginUserVO = redisCacheUtil.getCacheObject(CacheConstants.LOGIN_USER_KEY + token);
-            log.info("[getLoginUser]loginUserVo---------->{}",loginUserVO);
+            //log.info("[getLoginUser]loginUserVo---------->{}",loginUserVO);
             // 获取登录时间
             LocalDateTime loginTime = loginUserVO.getSysUser().getLoginTime();
             // 获取当前时间

@@ -67,8 +67,8 @@
             <option name="tableUIInfoList">
               <list>
                 <TableUIInfo>
-                  <option name="className" value="Devices" />
-                  <option name="tableName" value="t_devices" />
+                  <option name="className" value="SensorFields" />
+                  <option name="tableName" value="t_sensor_fields" />
                 </TableUIInfo>
               </list>
             </option>
