@@ -46,6 +46,15 @@ mybatis-plus:
  # reasonable: true
   #supportMethodsArguments: true
   #params: count=countSql
+mqtt:
+  broker: tcp://116.62.209.241:1883
+  username: admin
+  password: 123
+  timeout: 60
+  keepAlive: 20
+  qos: 1
+  pubTopic: data/#
+  subTopic: control/1
 
 jwt:
   token:
