@@ -2,10 +2,8 @@ package edu.whut.config.mybatis;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import org.apache.ibatis.reflection.MetaObject;
-import org.springframework.cglib.core.Local;
-
 import java.time.LocalDateTime;
-import java.util.Date;
+
 
 
 public class MyMetaHandler implements MetaObjectHandler {

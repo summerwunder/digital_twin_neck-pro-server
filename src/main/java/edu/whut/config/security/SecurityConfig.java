@@ -32,6 +32,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(
                 auth-> auth.requestMatchers(HttpMethod.POST,"/sys/user/login").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
                         .anyRequest().authenticated());
         //禁用session
         http.csrf(AbstractHttpConfigurer::disable);
@@ -50,9 +51,9 @@ public class SecurityConfig {
         http.exceptionHandling(exceptionHandling -> exceptionHandling
                 .authenticationEntryPoint(authEntryHandler) //处理用户未登录（未携带token）
         );
-
         return http.build();
     }
+
 
     @Bean
     public AuthenticationManager authenticationManager(){
