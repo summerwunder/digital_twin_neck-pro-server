@@ -1,6 +1,7 @@
 package edu.whut.mapper;
 
 import edu.whut.domain.dto.QueryDeviceDTO;
+import edu.whut.domain.vo.AllDeviceInfoVO;
 import edu.whut.domain.vo.QueryDeviceVO;
 import edu.whut.pojo.Devices;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
@@ -18,6 +19,8 @@ public interface DevicesMapper extends BaseMapper<Devices> {
 
     List<Devices> selectListByRules
             (@Param("dName")String dName, @Param("dIp")String dIp);
+
+    List<AllDeviceInfoVO> queryAllDeviceInfo(@Param("userId") Integer userId);
 }
 
 

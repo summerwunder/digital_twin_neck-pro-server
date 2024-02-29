@@ -1,6 +1,7 @@
 package edu.whut.service;
 
 import edu.whut.domain.dto.QueryDeviceDTO;
+import edu.whut.domain.vo.AllDeviceInfoVO;
 import edu.whut.domain.vo.QueryDeviceVO;
 import edu.whut.pojo.Devices;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -16,4 +17,6 @@ import java.util.List;
 public interface DevicesService extends IService<Devices> {
 
     PageResult getPageDevices(QueryDeviceDTO queryDevice);
+
+    List<AllDeviceInfoVO> queryAllDeviceInfo();
 }

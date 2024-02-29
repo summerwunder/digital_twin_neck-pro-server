@@ -2,6 +2,7 @@ package edu.whut.controller;
 
 import cn.hutool.core.util.ObjectUtil;
 import edu.whut.domain.dto.QueryDeviceDTO;
+import edu.whut.domain.vo.AllDeviceInfoVO;
 import edu.whut.domain.vo.QueryDeviceVO;
 import edu.whut.mapper.DevicesMapper;
 import edu.whut.response.PageResult;
@@ -24,5 +25,11 @@ public class DevicesController {
     public Result getPageDevices(@RequestBody QueryDeviceDTO queryDevice){
         PageResult pageResult=devicesService.getPageDevices(queryDevice);
         return Result.success("fine",pageResult);
+    }
+
+    @GetMapping("list")
+    public Result getAllDeviceInfo(){
+        List<AllDeviceInfoVO> allDeviceInfoList=devicesService.queryAllDeviceInfo();
+        return Result.success("fine",allDeviceInfoList);
     }
 }

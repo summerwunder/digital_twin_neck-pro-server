@@ -15,6 +15,7 @@
             <result property="dIp" column="d_ip" jdbcType="VARCHAR"/>
             <result property="version" column="version" jdbcType="INTEGER"/>
             <result property="isDeleted" column="is_deleted" jdbcType="INTEGER"/>
+            <collection property="sensorFieldsList" javaType="list" resultMap="edu.whut.mapper.SensorFieldsMapper.BaseResultMap"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -42,5 +43,37 @@
         ORDER BY
          d_status = 1 ASC
         ,update_time DESC
+    </select>
+
+    <!--此处可以优化，多表查询最好不要超过三张表 -->
+    <select id="queryAllDeviceInfo" resultMap="BaseResultMap">
+        SELECT
+            td.did,
+            td.d_name,
+            td.d_mark,
+            td.d_status,
+            td.create_time,
+            td.update_time,
+            td.d_ip,
+            tsf.nid ,
+            tsf.n_name ,
+            tsf.n_unit ,
+            tsf.n_description ,
+            tsf.is_alter ,
+            tsf.alter_top ,
+            tsf.alter_down,
+            tsf.alter_description ,
+            tsf.alter_intensity
+        FROM
+            t_devices td
+                LEFT JOIN
+            t_user_map_devices tumd ON td.did = tumd.d_id
+                LEFT JOIN
+            t_fields_map_devices tfmd ON td.did = tfmd.d_id
+                LEFT JOIN
+            t_sensor_fields tsf ON tfmd.f_id = tsf.nid
+        WHERE
+            tumd.u_id = #{userId}
+
     </select>
 </mapper>

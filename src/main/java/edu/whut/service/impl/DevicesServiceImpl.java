@@ -2,6 +2,7 @@ package edu.whut.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
+import edu.whut.domain.vo.AllDeviceInfoVO;
 import edu.whut.response.PageResult;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -12,6 +13,7 @@ import edu.whut.domain.vo.QueryDeviceVO;
 import edu.whut.pojo.Devices;
 import edu.whut.service.DevicesService;
 import edu.whut.mapper.DevicesMapper;
+import edu.whut.utils.security.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +67,18 @@ public class DevicesServiceImpl extends ServiceImpl<DevicesMapper, Devices>
                 =new PageResult<>(listReturn,rowPage.getTotal());
 
         return pageResult;
+    }
+
+    /**
+     * 获取设备的完整信息
+     * @return
+     */
+    @Override
+    public List<AllDeviceInfoVO> queryAllDeviceInfo() {
+        Integer userId= SecurityUtil.getUserId();
+        List<AllDeviceInfoVO> devicesList=devicesMapper.queryAllDeviceInfo(userId);
+        log.info("查到的数据------->{}",devicesList);
+        return devicesList;
     }
 }
 

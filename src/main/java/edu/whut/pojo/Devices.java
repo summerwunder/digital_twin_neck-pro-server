@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.annotation.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
@@ -36,6 +37,9 @@ public class Devices implements Serializable {
     private Integer version;
     @TableLogic
     private Integer isDeleted;
+
+    @TableField(exist = false)
+    private List<SensorFields> sensorFieldsList;
 
     private static final long serialVersionUID = 1L;
 }
