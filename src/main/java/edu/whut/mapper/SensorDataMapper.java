@@ -1,7 +1,11 @@
 package edu.whut.mapper;
 
+import edu.whut.domain.vo.SensorDataVO;
 import edu.whut.pojo.SensorData;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
 * @author wunder
@@ -11,6 +15,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 */
 public interface SensorDataMapper extends BaseMapper<SensorData> {
 
+    List<SensorDataVO> getLatestSensorDataByDeviceId(@Param("deviceId")Integer deviceId);
 }
 
 

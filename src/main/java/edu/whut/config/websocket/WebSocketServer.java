@@ -4,20 +4,32 @@ package edu.whut.config.websocket;
 import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import edu.whut.constants.HttpStatus;
+import edu.whut.domain.vo.SensorDataVO;
 import edu.whut.exception.ServiceException;
+import edu.whut.mapper.SensorDataMapper;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
-@ServerEndpoint("/ws/message/{userId}")
+@ServerEndpoint("/ws/message/{userId}/{deviceId}")
 public class WebSocketServer {
     private Session session;
     /**concurrent包的线程安全Set，用来存放每个客户端对应的WebSocket对象。*/
@@ -25,9 +37,23 @@ public class WebSocketServer {
 
     private Integer deviceId;
 
-    private static ConcurrentHashMap<Integer,WebSocketServer> webSocketMap=new ConcurrentHashMap();
+    private static ConcurrentHashMap<Integer,WebSocketServer> webSocketMap=
+            new ConcurrentHashMap();
+
+    //保存上一次的数据
+    private List<SensorDataVO> sensorDataList=new ArrayList<>();
+
+    @Autowired
+    private static SensorDataMapper sensorDataMapper;
+
+    @Autowired
+    public void setSensorDataMapper(SensorDataMapper  sensorDataMapper) {
+        WebSocketServer.sensorDataMapper = sensorDataMapper;
+    }
+
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     @OnOpen
-    public void onOpen(Session session, @PathParam("userId")int userId,@PathParam("userId")int deviceId){
+    public void onOpen(Session session, @PathParam("userId")int userId,@PathParam("deviceId")int deviceId){
         this.session = session;
         this.userId= userId;
         this.deviceId=deviceId;
@@ -42,6 +68,15 @@ public class WebSocketServer {
             //加入set中
             webSocketMap.put(userId,this);
         }
+        scheduler.scheduleAtFixedRate(() -> {
+                    try {
+                        sendSensorData();
+                    } catch (JsonProcessingException e) {
+                        log.error(e.getMessage());
+                        throw new RuntimeException(e);
+                    }
+                },
+                0, 1, TimeUnit.SECONDS);
         log.info("连接成功，deviceId"+deviceId+"-----userId:"+userId);
         sendMessage("连接成功");
     }
@@ -102,10 +137,35 @@ public class WebSocketServer {
      */
     public void sendMessage(String message) {
         try {
-            this.session.getBasicRemote().sendText(message);
+            if (this.session.isOpen()) {
+                synchronized(session){
+                    this.session.getBasicRemote().sendText(message);
+                }
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * 获取SensorData数据并发送
+     */
+    public void sendSensorData() throws JsonProcessingException {
+        List<SensorDataVO> sensorDataList=
+                sensorDataMapper.getLatestSensorDataByDeviceId(this.deviceId);
+        //log.info("传感器数据--------{}",sensorDataList);
+        //如果两次数据一样就不传递
+        if(this.sensorDataList.equals(sensorDataList)){
+            return;
+        }
+        //更新上一次的数据
+        this.sensorDataList=sensorDataList;
+        //需要序列化时间，导入包
+        ObjectMapper objectMapper=new ObjectMapper();
+        objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
+        objectMapper.registerModule(new JavaTimeModule());
+        String str = objectMapper.writeValueAsString(sensorDataList);
+        this.sendMessage(str);
     }
 }
 

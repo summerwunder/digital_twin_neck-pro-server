@@ -17,4 +17,37 @@
         sid,device_id,field_id,
         value_num,value_str,update_time
     </sql>
+    <select id="getLatestSensorDataByDeviceId" resultType="edu.whut.domain.vo.SensorDataVO">
+        SELECT
+            sd.sensorFieldName,
+            sd.valueNum,
+            sd.valueStr,
+            sd.updateTime
+        FROM
+            (SELECT
+                 n.n_name AS sensorFieldName,
+                 sd.value_num AS valueNum,
+                 sd.value_str AS valueStr,
+                 sd.update_time AS updateTime
+             FROM
+                 t_sensor_data sd
+                     JOIN
+                 t_sensor_fields n ON sd.field_id = n.nid
+             WHERE
+                 sd.device_id = #{deviceId}
+               AND
+                     (n.n_name, sd.update_time) IN (
+                     SELECT
+                         n.n_name,
+                         MAX(sd.update_time)
+                     FROM
+                         t_sensor_data sd
+                             JOIN
+                         t_sensor_fields n ON sd.field_id = n.nid
+                     WHERE
+                         sd.device_id = #{deviceId}
+                     GROUP BY
+                         n.n_name
+                 )) AS sd;
+    </select>
 </mapper>

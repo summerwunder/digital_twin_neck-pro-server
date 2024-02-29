@@ -1,8 +1,6 @@
 package edu.whut.config.mqtt;
 
 import edu.whut.config.properties.MqttProperties;
-import edu.whut.utils.security.SecurityUtil;
-import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
@@ -10,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.event.EventListener;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.integration.channel.DirectChannel;
 import org.springframework.integration.core.MessageProducer;
@@ -20,10 +17,7 @@ import org.springframework.integration.mqtt.event.*;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
 import org.springframework.integration.mqtt.outbound.MqttPahoMessageHandler;
 import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
-import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHandler;
-import org.springframework.messaging.MessagingException;
 
 import java.util.UUID;
 
@@ -34,8 +28,6 @@ import java.util.UUID;
 public class MqttConfig {
     @Autowired
     private MqttProperties properties;
-    private MqttPahoClientFactory mqttPahoClientFactory;
-
     @Bean
     public MqttPahoClientFactory mqttPahoClientFactory(){
         MqttConnectOptions options=new MqttConnectOptions();

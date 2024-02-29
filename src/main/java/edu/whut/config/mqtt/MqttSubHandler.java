@@ -26,8 +26,8 @@ public class MqttSubHandler {
             @Override
             public void handleMessage(Message<?> message) throws MessagingException {
                 //System.out.println(message);
-                System.out.println("收到订阅消息：消息主题"+message.getHeaders().get("mqtt_receivedTopic").toString());
-                System.out.println("消息内容"+message.getPayload().toString());
+                //System.out.println("收到订阅消息：消息主题"+message.getHeaders().get("mqtt_receivedTopic").toString());
+                //System.out.println("消息内容"+message.getPayload().toString());
 
                 ObjectMapper mapper=new ObjectMapper();
                 try {
