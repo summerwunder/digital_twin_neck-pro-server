@@ -1,10 +1,17 @@
 package edu.whut.service.impl;
 
+import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import edu.whut.domain.dto.SensorDataChartsDTO;
+import edu.whut.domain.vo.QuerySensorDataVO;
 import edu.whut.pojo.SensorData;
 import edu.whut.service.SensorDataService;
 import edu.whut.mapper.SensorDataMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
 * @author wunder
@@ -15,6 +22,27 @@ import org.springframework.stereotype.Service;
 public class SensorDataServiceImpl extends ServiceImpl<SensorDataMapper, SensorData>
     implements SensorDataService{
 
+    @Autowired
+    private SensorDataMapper mapper;
+    @Override
+    public List<QuerySensorDataVO> querySensorData(SensorDataChartsDTO sensorDataChartsDTO) {
+        if(ObjectUtil.isNotNull(sensorDataChartsDTO)){
+            /*List<QuerySensorDataVO> querySensorDataVOS=
+                    mapper.querySensorData(sensorDataChartsDTO.getDeivceId(),sensorDataChartsDTO.getSensorIds());
+            return querySensorDataVOS;*/
+            List<QuerySensorDataVO> querySensorDataVOS=new ArrayList<>();
+            for(Integer sensorId:sensorDataChartsDTO.getSensorIds()){
+                List<QuerySensorDataVO> sensorData =
+                        mapper.querySensorData(sensorDataChartsDTO.getDeivceId(),sensorId);
+                // 将传感器数据添加到结果列表中
+                querySensorDataVOS.addAll(sensorData.subList(0, Math.min(sensorData.size(), 8))); // 最多添加8条数据
+
+            }
+            return querySensorDataVOS;
+
+        }
+        return null;
+    }
 }
 
 

@@ -50,4 +50,25 @@
                          n.n_name
                  )) AS sd;
     </select>
+    <select id="querySensorData" resultType="edu.whut.domain.vo.QuerySensorDataVO">
+        SELECT
+        sf.n_description AS sensorName,
+        sf.nid AS sensorId,
+        sd.value_num AS valueNum,
+        sd.value_str AS valueStr,
+        sd.update_time AS updateTime
+        FROM
+        t_sensor_data sd
+        JOIN
+        t_sensor_fields sf ON sd.field_id = sf.nid
+        WHERE
+        sd.device_id = #{deviceId}
+        AND
+        sd.field_id = #{sensorId}
+        AND
+        sf.is_deleted=0
+        ORDER BY
+        sd.field_id,
+        sd.update_time DESC
+    </select>
 </mapper>

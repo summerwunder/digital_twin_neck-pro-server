@@ -1,7 +1,12 @@
 package edu.whut.service;
 
+import edu.whut.domain.dto.SensorDataChartsDTO;
+import edu.whut.domain.vo.QuerySensorDataVO;
+import edu.whut.domain.vo.SensorDataVO;
 import edu.whut.pojo.SensorData;
 import com.baomidou.mybatisplus.extension.service.IService;
+
+import java.util.List;
 
 /**
 * @author wunder
@@ -10,4 +15,5 @@ import com.baomidou.mybatisplus.extension.service.IService;
 */
 public interface SensorDataService extends IService<SensorData> {
 
+    List<QuerySensorDataVO> querySensorData(SensorDataChartsDTO sensorDataChartsDTO);
 }
