@@ -3,7 +3,9 @@ package edu.whut.config.mqtt;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.whut.mapper.DevicesMapper;
 import edu.whut.mapper.SensorDataMapper;
+import edu.whut.pojo.Devices;
 import edu.whut.pojo.SensorData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -21,6 +23,8 @@ import java.util.List;
 public class MqttSubHandler {
     @Autowired
     private SensorDataMapper  dataMapper;
+    @Autowired
+    private DevicesMapper devicesMapper;
     @Bean
     @ServiceActivator(inputChannel = "mqttInBoundChannel" )
     public MessageHandler mqttInputHandler(){
@@ -54,8 +58,13 @@ public class MqttSubHandler {
                     LocalDateTime currentTime = LocalDateTime.now();
                     for (SensorData data : sensorDataList) {
                         data.setUpdateTime(currentTime);
-                        // 将数据插入数据库或进行其他操作
+                        // 将数据插入数据库
                         dataMapper.insert(data);
+                        //TODO 此处需要修改物联网设备的更新时间
+                        Devices devices=new Devices();
+                        devices.setUpdateTime(LocalDateTime.now());
+                        devices.setDid(data.getDeviceId());
+                        devicesMapper.updateById(devices);
                     }
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);
