@@ -1,6 +1,8 @@
 package edu.whut.controller;
 
 import cn.hutool.core.util.ObjectUtil;
+import edu.whut.constants.HttpStatus;
+import edu.whut.domain.dto.DeviceAddDTO;
 import edu.whut.domain.dto.QueryDeviceDTO;
 import edu.whut.domain.vo.AllDeviceInfoVO;
 import edu.whut.domain.vo.QueryDeviceVO;
@@ -31,5 +33,14 @@ public class DevicesController {
     public Result getAllDeviceInfo(){
         List<AllDeviceInfoVO> allDeviceInfoList=devicesService.queryAllDeviceInfo();
         return Result.success("fine",allDeviceInfoList);
+    }
+
+    @PostMapping("list/add")
+    public Result addDeviceInfo(@RequestBody DeviceAddDTO deviceAddDTO){
+        int row=devicesService.addDeviceInfo(deviceAddDTO);
+        if(row==0){
+            return Result.error(HttpStatus.ERROR,"插入失败");
+        }
+        return Result.success("添加成功");
     }
 }

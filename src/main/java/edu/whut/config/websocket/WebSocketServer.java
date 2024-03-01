@@ -78,7 +78,7 @@ public class WebSocketServer {
                 },
                 0, 1, TimeUnit.SECONDS);
         log.info("连接成功，deviceId"+deviceId+"-----userId:"+userId);
-        sendMessage("连接成功");
+        //sendMessage("连接成功");
     }
     /**
      * 连接关闭

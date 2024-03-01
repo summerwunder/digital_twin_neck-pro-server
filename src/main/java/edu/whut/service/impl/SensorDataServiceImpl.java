@@ -35,7 +35,7 @@ public class SensorDataServiceImpl extends ServiceImpl<SensorDataMapper, SensorD
                 List<QuerySensorDataVO> sensorData =
                         mapper.querySensorData(sensorDataChartsDTO.getDeivceId(),sensorId);
                 // 将传感器数据添加到结果列表中
-                querySensorDataVOS.addAll(sensorData.subList(0, Math.min(sensorData.size(), 8))); // 最多添加8条数据
+                querySensorDataVOS.addAll(sensorData.subList(0, Math.min(sensorData.size(), 20))); // 最多获取20条数据
 
             }
             return querySensorDataVOS;

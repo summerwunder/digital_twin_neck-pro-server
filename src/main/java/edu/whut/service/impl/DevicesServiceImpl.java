@@ -2,6 +2,7 @@ package edu.whut.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
+import edu.whut.domain.dto.DeviceAddDTO;
 import edu.whut.domain.vo.AllDeviceInfoVO;
 import edu.whut.response.PageResult;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -19,8 +20,10 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
 * @author wunder
@@ -79,6 +82,27 @@ public class DevicesServiceImpl extends ServiceImpl<DevicesMapper, Devices>
         List<AllDeviceInfoVO> devicesList=devicesMapper.queryAllDeviceInfo(userId);
         log.info("查到的数据------->{}",devicesList);
         return devicesList;
+    }
+
+    @Override
+    public int addDeviceInfo(DeviceAddDTO deviceAddDTO) {
+        if(ObjectUtil.isNull(deviceAddDTO)){
+            return 0;
+        }
+        Devices device=new Devices();
+        //设置插入的设备信息
+        device.setDName(deviceAddDTO.getDeviceName());
+        device.setIsDeleted(0);
+        device.setVersion(1);
+        device.setDStatus(0);
+        device.setDNumber(UUID.randomUUID().toString());
+        device.setDIp(deviceAddDTO.getDeviceIp());
+        device.setDMark(deviceAddDTO.getDeviceMark());
+        //此处不采用自动注入
+        LocalDateTime now=LocalDateTime.now();
+        device.setCreateTime(now);
+        device.setUpdateTime(now);
+        return devicesMapper.insert(device);
     }
 }
 
