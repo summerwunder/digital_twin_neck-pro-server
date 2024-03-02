@@ -39,7 +39,7 @@ public class DevicesController {
     public Result addDeviceInfo(@RequestBody DeviceAddDTO deviceAddDTO){
         int row=devicesService.addDeviceInfo(deviceAddDTO);
         if(row==0){
-            return Result.error(HttpStatus.ERROR,"插入失败");
+            return Result.success("数据问题，插入失败");
         }
         return Result.success("添加成功");
     }

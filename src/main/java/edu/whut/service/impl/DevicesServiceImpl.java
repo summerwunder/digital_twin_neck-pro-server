@@ -89,6 +89,14 @@ public class DevicesServiceImpl extends ServiceImpl<DevicesMapper, Devices>
         if(ObjectUtil.isNull(deviceAddDTO)){
             return 0;
         }
+        LambdaQueryWrapper<Devices> lambdaQueryWrapper=
+               new LambdaQueryWrapper();
+        lambdaQueryWrapper.eq(Devices::getDName,deviceAddDTO.getDeviceName());
+        Devices devices = devicesMapper.selectOne(lambdaQueryWrapper);
+        //代表重复
+        if(ObjectUtil.isNotNull(devices)){
+            return 0;
+        }
         Devices device=new Devices();
         //设置插入的设备信息
         device.setDName(deviceAddDTO.getDeviceName());
