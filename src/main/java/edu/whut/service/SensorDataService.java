@@ -16,4 +16,6 @@ import java.util.List;
 public interface SensorDataService extends IService<SensorData> {
 
     List<QuerySensorDataVO> querySensorData(SensorDataChartsDTO sensorDataChartsDTO);
+
+    void delDataByDeviceId(Integer deviceId);
 }

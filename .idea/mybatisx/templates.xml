@@ -67,8 +67,8 @@
             <option name="tableUIInfoList">
               <list>
                 <TableUIInfo>
-                  <option name="className" value="FieldsMapDevices" />
-                  <option name="tableName" value="t_fields_map_devices" />
+                  <option name="className" value="UserMapDevices" />
+                  <option name="tableName" value="t_user_map_devices" />
                 </TableUIInfo>
               </list>
             </option>

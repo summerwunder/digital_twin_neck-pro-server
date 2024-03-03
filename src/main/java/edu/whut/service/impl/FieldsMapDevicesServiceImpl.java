@@ -38,6 +38,19 @@ public class FieldsMapDevicesServiceImpl extends ServiceImpl<FieldsMapDevicesMap
         }
         return false;
     }
+
+    /**
+     * 此前已经验证过设备ID的合理性
+     * 根据设备id删除设备和传感器的对应关系
+     * @param deviceId
+     */
+    @Override
+    public void delMapByDeviceId(Integer deviceId) {
+        LambdaQueryWrapper<FieldsMapDevices> lambdaQueryWrapper
+                =new LambdaQueryWrapper();
+        lambdaQueryWrapper.eq(FieldsMapDevices::getDId,deviceId);
+        mapper.delete(lambdaQueryWrapper);
+    }
 }
 
 

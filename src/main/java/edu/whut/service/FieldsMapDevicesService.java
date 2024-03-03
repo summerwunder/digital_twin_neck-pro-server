@@ -12,4 +12,6 @@ import com.baomidou.mybatisplus.extension.service.IService;
 public interface FieldsMapDevicesService extends IService<FieldsMapDevices> {
 
     boolean addLinker(AddLinkDTO addLinkDTO);
+
+    void delMapByDeviceId(Integer deviceId);
 }

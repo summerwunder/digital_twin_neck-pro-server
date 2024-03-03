@@ -10,6 +10,9 @@ import edu.whut.mapper.DevicesMapper;
 import edu.whut.response.PageResult;
 import edu.whut.response.Result;
 import edu.whut.service.DevicesService;
+import edu.whut.service.FieldsMapDevicesService;
+import edu.whut.service.SensorDataService;
+import jakarta.websocket.server.PathParam;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -23,6 +26,10 @@ import java.util.List;
 public class DevicesController {
     @Autowired
     private DevicesService devicesService;
+    @Autowired
+    private FieldsMapDevicesService fieldsMapDevicesService;
+    @Autowired
+    private SensorDataService sensorDataService;
     @PostMapping("list")
     public Result getPageDevices(@RequestBody QueryDeviceDTO queryDevice){
         PageResult pageResult=devicesService.getPageDevices(queryDevice);
@@ -42,5 +49,18 @@ public class DevicesController {
             return Result.success("数据问题，插入失败");
         }
         return Result.success("添加成功");
+    }
+
+    @DeleteMapping("list/{deviceId}")
+    public Result delDevice(@PathVariable("deviceId") Integer deviceId){
+        boolean isdel=devicesService.delDevice(deviceId);
+        if(isdel){
+            fieldsMapDevicesService.delMapByDeviceId(deviceId);
+            sensorDataService.delDataByDeviceId(deviceId);
+            return Result.success("删除成功");
+        }else{
+            return Result.error("未找到相应的数据，删除失败");
+        }
+
     }
 }

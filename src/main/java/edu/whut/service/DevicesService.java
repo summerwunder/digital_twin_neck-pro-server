@@ -17,6 +17,8 @@ import java.util.List;
 */
 public interface DevicesService extends IService<Devices> {
 
+    boolean delDevice(Integer deviceId);
+
     PageResult getPageDevices(QueryDeviceDTO queryDevice);
 
     List<AllDeviceInfoVO> queryAllDeviceInfo();

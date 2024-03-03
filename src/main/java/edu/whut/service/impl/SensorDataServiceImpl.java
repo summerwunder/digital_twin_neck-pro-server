@@ -1,6 +1,7 @@
 package edu.whut.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import edu.whut.domain.dto.SensorDataChartsDTO;
 import edu.whut.domain.vo.QuerySensorDataVO;
@@ -42,6 +43,19 @@ public class SensorDataServiceImpl extends ServiceImpl<SensorDataMapper, SensorD
 
         }
         return null;
+    }
+
+    /**
+     * 此前已经验证过设备id的合理性
+     * 根据设备id删除传感器的数据
+     * @param deviceId
+     */
+    @Override
+    public void delDataByDeviceId(Integer deviceId) {
+        LambdaQueryWrapper<SensorData> sensorDataLambdaQueryWrapper
+                =new LambdaQueryWrapper<>();
+        sensorDataLambdaQueryWrapper.eq(SensorData::getDeviceId,deviceId);
+        mapper.delete(sensorDataLambdaQueryWrapper);
     }
 }
 
