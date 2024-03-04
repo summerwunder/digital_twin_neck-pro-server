@@ -14,7 +14,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @Slf4j
@@ -24,16 +26,24 @@ public class DataController {
     private MqttGateway gateway;
     @Autowired
     private SensorDataService sensorDataService;
+
+    /**
+     * 获取传感器数据渲染表格
+     * @param sensorDataChartsDTO
+     * @return
+     */
     @PostMapping("list")
     public Result getDataList(@RequestBody SensorDataChartsDTO sensorDataChartsDTO){
-        //log.error("fine");
-        //System.out.println(SecurityUtil.getLoginUser().getSysUser().getUserName());
-        //System.out.println(SecurityUtil.getLoginUser().getSysUser().getUserPwd());
-        List<QuerySensorDataVO> sensorDataVOS=sensorDataService.querySensorData(sensorDataChartsDTO);
+        List<QuerySensorDataVO> sensorDataVOS=
+                sensorDataService.querySensorData(sensorDataChartsDTO);
+        Map<String,Object> map=new HashMap<>();
+        map.put("data",sensorDataVOS);
         if(ObjectUtil.isEmpty(sensorDataVOS)){
-            return Result.error(HttpStatus.BAD_REQUEST,"请求格式错误");
+            map.put("msg","无对应的传感器数据");
+        }else{
+            map.put("msg","成功获取数据");
         }
-        return Result.success(sensorDataVOS);
+        return Result.success(map);
     }
 
     @PostMapping("mqtt")

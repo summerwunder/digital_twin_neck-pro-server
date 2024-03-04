@@ -2,6 +2,9 @@ package edu.whut.mapper;
 
 import edu.whut.pojo.SensorFields;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
 * @author wunder
@@ -11,6 +14,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 */
 public interface SensorFieldsMapper extends BaseMapper<SensorFields> {
 
+    List<SensorFields> getAllSensors(@Param("userId") Integer userId);
 }
 
 

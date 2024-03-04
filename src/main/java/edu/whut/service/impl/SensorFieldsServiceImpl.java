@@ -10,6 +10,7 @@ import edu.whut.pojo.SensorFields;
 import edu.whut.response.PageResult;
 import edu.whut.service.SensorFieldsService;
 import edu.whut.mapper.SensorFieldsMapper;
+import edu.whut.utils.security.SecurityUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -47,6 +48,18 @@ public class SensorFieldsServiceImpl extends ServiceImpl<SensorFieldsMapper, Sen
                 =new PageResult<>(rowPage.getRecords(),rowPage.getTotal());
 
         return pageResult;
+    }
+
+    /**
+     *
+     * 获取所有传感器的信息
+     * @return
+     */
+    @Override
+    public List<SensorFields> getAllSensors() {
+        Integer userId= SecurityUtil.getUserId();
+        List<SensorFields> list=mapper.getAllSensors(userId);
+        return list;
     }
 }
 

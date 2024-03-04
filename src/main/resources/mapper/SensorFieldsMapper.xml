@@ -24,4 +24,12 @@
         alter_down,alter_description,alter_intensity,
         version,is_deleted
     </sql>
+
+    <select id="getAllSensors" resultType="edu.whut.pojo.SensorFields">
+        select sf.*
+        from t_sensor_fields sf
+                 right join
+             t_user_map_sensors ums on sf.nid = ums.s_id
+        where ums.u_id = #{userId}
+    </select>
 </mapper>

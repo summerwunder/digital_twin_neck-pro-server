@@ -1,6 +1,7 @@
 package edu.whut.controller;
 
 import edu.whut.domain.dto.AddLinkDTO;
+import edu.whut.pojo.SensorFields;
 import edu.whut.response.PageResult;
 import edu.whut.response.Result;
 import edu.whut.service.FieldsMapDevicesService;
@@ -8,6 +9,8 @@ import edu.whut.service.SensorFieldsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @Slf4j
@@ -21,9 +24,20 @@ public class SensorFieldController {
     public Result getSensorList(@RequestParam String sensorName,
                                 @RequestParam Integer pageNum,
                                 @RequestParam Integer pageSize) {
-        log.info("sensorName--->{}",sensorName);
+        //log.info("sensorName--->{}",sensorName);
         PageResult pageResult=sensorFieldsService.getPageSensors(sensorName,pageNum,pageSize);
         return Result.success("fine",pageResult);
+    }
+
+    /**
+     * 获取所有传感器的信息
+     * @return
+     */
+    @GetMapping("/all")
+    public Result getAllSensors(){
+        List<SensorFields> sensorFieldsList=
+                sensorFieldsService.getAllSensors();
+        return Result.success(sensorFieldsList);
     }
 
     /**

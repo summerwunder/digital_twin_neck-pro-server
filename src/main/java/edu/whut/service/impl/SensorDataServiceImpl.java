@@ -32,15 +32,16 @@ public class SensorDataServiceImpl extends ServiceImpl<SensorDataMapper, SensorD
                     mapper.querySensorData(sensorDataChartsDTO.getDeivceId(),sensorDataChartsDTO.getSensorIds());
             return querySensorDataVOS;*/
             List<QuerySensorDataVO> querySensorDataVOS=new ArrayList<>();
-            for(Integer sensorId:sensorDataChartsDTO.getSensorIds()){
-                List<QuerySensorDataVO> sensorData =
-                        mapper.querySensorData(sensorDataChartsDTO.getDeivceId(),sensorId);
-                // 将传感器数据添加到结果列表中
-                querySensorDataVOS.addAll(sensorData.subList(0, Math.min(sensorData.size(), 20))); // 最多获取20条数据
-
+            //先判断是否需要查询数据
+            if(ObjectUtil.isNotEmpty(sensorDataChartsDTO.getSensorIds())){
+                for(Integer sensorId:sensorDataChartsDTO.getSensorIds()){
+                    List<QuerySensorDataVO> sensorData =
+                            mapper.querySensorData(sensorDataChartsDTO.getDeivceId(),sensorId);
+                    // 将传感器数据添加到结果列表中
+                    querySensorDataVOS.addAll(sensorData.subList(0, Math.min(sensorData.size(), 20))); // 最多获取20条数据
+                }
+                return querySensorDataVOS;
             }
-            return querySensorDataVOS;
-
         }
         return null;
     }

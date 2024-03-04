@@ -10,7 +10,8 @@ spring:
     type: com.alibaba.druid.pool.DruidDataSource
     druid:
       url: jdbc:mysql:///digit_twin
-      username: root
+      username: root  #开发环境
+      #username: raymond
       password: 123456wmr
       driver-class-name: com.mysql.cj.jdbc.Driver
     # 配置redis
