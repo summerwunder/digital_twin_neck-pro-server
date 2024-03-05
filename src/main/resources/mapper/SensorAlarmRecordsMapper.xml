@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="edu.whut.mapper.SensorAlarmRecordsMapper">
+
+    <resultMap id="BaseResultMap" type="edu.whut.pojo.SensorAlarmRecords">
+            <id property="aid" column="aid" jdbcType="INTEGER"/>
+            <result property="deviceId" column="device_id" jdbcType="INTEGER"/>
+            <result property="fieldId" column="field_id" jdbcType="INTEGER"/>
+            <result property="alarmTime" column="alarm_time" jdbcType="TIMESTAMP"/>
+            <result property="alarmDescription" column="alarm_description" jdbcType="VARCHAR"/>
+            <result property="alarmIntensity" column="alarm_intensity" jdbcType="INTEGER"/>
+            <result property="alarmValue" column="alarm_value" jdbcType="DOUBLE"/>
+            <result property="isCleared" column="is_cleared" jdbcType="INTEGER"/>
+            <result property="clearedTime" column="cleared_time" jdbcType="TIMESTAMP"/>
+            <result property="clearedDescription" column="cleared_description" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        aid,device_id,field_id,
+        alarm_time,alarm_description,alarm_intensity,
+        alarm_value,is_cleared,cleared_time,
+        cleared_description
+    </sql>
+
+    <select id="getAllAlarmRecords" resultType="edu.whut.domain.vo.AlarmRecordVO">
+        SELECT
+            ar.alarm_time AS alarmTime,
+            ar.alarm_description AS alarmDescription,
+            ar.alarm_intensity AS alarmIntensity,
+            ar.alarm_value AS alarmValue,
+            ar.is_cleared AS isCleared,
+            ar.cleared_time AS clearedTime,
+            ar.cleared_description AS clearedDescription,
+            d.did AS dId,
+            d.d_name AS dName,
+            d.d_mark AS dMark
+        FROM
+            t_sensor_alarm_records ar
+        LEFT JOIN
+            t_devices d ON ar.device_id=d.did
+        where ar.field_id=#{sensorId}
+        ORDER BY ar.alarm_time DESC
+        <if test="size!=-1">
+            LIMIT #{size}
+        </if>
+    </select>
+</mapper>
