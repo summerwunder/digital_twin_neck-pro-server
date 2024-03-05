@@ -26,6 +26,7 @@
 
     <select id="getAllAlarmRecords" resultType="edu.whut.domain.vo.AlarmRecordVO">
         SELECT
+            ar.aid AS alarmId,
             ar.alarm_time AS alarmTime,
             ar.alarm_description AS alarmDescription,
             ar.alarm_intensity AS alarmIntensity,

@@ -1,5 +1,6 @@
 package edu.whut.service;
 
+import edu.whut.domain.dto.SensorFieldsUpdateDTO;
 import edu.whut.pojo.SensorFields;
 import com.baomidou.mybatisplus.extension.service.IService;
 import edu.whut.response.PageResult;
@@ -16,4 +17,6 @@ public interface SensorFieldsService extends IService<SensorFields> {
     PageResult getPageSensors(String sensorName, Integer pageNum, Integer pageSize);
 
     List<SensorFields> getAllSensors();
+
+    boolean updateSensorField(SensorFieldsUpdateDTO sensorFieldsUpdateDTO);
 }

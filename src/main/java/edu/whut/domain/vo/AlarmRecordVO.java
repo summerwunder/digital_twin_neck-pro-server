@@ -7,6 +7,8 @@ import java.util.Date;
 
 @Data
 public class AlarmRecordVO {
+    //报警ID
+    private Integer alarmId;
     //设备基本信息
     private Integer dId;
 

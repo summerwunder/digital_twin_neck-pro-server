@@ -1,5 +1,6 @@
 package edu.whut.service;
 
+import edu.whut.domain.dto.AlarmRecordUpdateDTO;
 import edu.whut.domain.vo.AlarmRecordVO;
 import edu.whut.pojo.SensorAlarmRecords;
 import com.baomidou.mybatisplus.extension.service.IService;
@@ -14,4 +15,6 @@ import java.util.List;
 public interface SensorAlarmRecordsService extends IService<SensorAlarmRecords> {
 
     List<AlarmRecordVO> getAllAlarmRecords(Integer sensorId, Integer size);
+
+    boolean updateAlarmInfo(AlarmRecordUpdateDTO recordUpdateDTO);
 }

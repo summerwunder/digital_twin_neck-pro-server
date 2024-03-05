@@ -2,6 +2,8 @@ package edu.whut.controller;
 
 import cn.hutool.core.util.ObjectUtil;
 import edu.whut.domain.dto.AddLinkDTO;
+import edu.whut.domain.dto.AlarmRecordUpdateDTO;
+import edu.whut.domain.dto.SensorFieldsUpdateDTO;
 import edu.whut.domain.vo.AlarmRecordVO;
 import edu.whut.pojo.SensorAlarmRecords;
 import edu.whut.pojo.SensorFields;
@@ -47,6 +49,20 @@ public class SensorFieldController {
     }
 
     /**
+     * 修改传感器字段的信息
+     * @param
+     * @return
+     */
+    @PutMapping
+    public Result updateSensorField(@RequestBody SensorFieldsUpdateDTO sensorFieldsUpdateDTO){
+        boolean isOk=sensorFieldsService.updateSensorField(sensorFieldsUpdateDTO);
+        if (isOk) {
+            return Result.success("更新成功");
+        }else{
+            return Result.success("更新失败");
+        }
+    }
+    /**
      * 添加传感器字段向设备字段的绑定
      * @return
      */
@@ -69,5 +85,18 @@ public class SensorFieldController {
         List<AlarmRecordVO> sensorAlarmRecords
                 =sensorAlarmRecordsService.getAllAlarmRecords(sensorId,size);
         return Result.success(sensorAlarmRecords);
+    }
+
+    /*
+    更新传感器的报警，修改清除信息
+     */
+    @PostMapping("alarm")
+    public Result updateAlarmInfo(@RequestBody AlarmRecordUpdateDTO recordUpdateDTO){
+        boolean isOk=sensorAlarmRecordsService.updateAlarmInfo(recordUpdateDTO);
+        if (isOk) {
+            return Result.success("清理成功");
+        }else{
+            return Result.success("操作失败");
+        }
     }
 }

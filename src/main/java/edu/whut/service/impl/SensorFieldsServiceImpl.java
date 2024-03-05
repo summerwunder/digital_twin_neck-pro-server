@@ -4,6 +4,7 @@ import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import edu.whut.domain.dto.SensorFieldsUpdateDTO;
 import edu.whut.domain.vo.QueryDeviceVO;
 import edu.whut.pojo.Devices;
 import edu.whut.pojo.SensorFields;
@@ -11,6 +12,7 @@ import edu.whut.response.PageResult;
 import edu.whut.service.SensorFieldsService;
 import edu.whut.mapper.SensorFieldsMapper;
 import edu.whut.utils.security.SecurityUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,7 @@ import java.util.List;
 * @createDate 2024-02-26 22:58:28
 */
 @Service
+@Slf4j
 public class SensorFieldsServiceImpl extends ServiceImpl<SensorFieldsMapper, SensorFields>
     implements SensorFieldsService{
 
@@ -43,11 +46,7 @@ public class SensorFieldsServiceImpl extends ServiceImpl<SensorFieldsMapper, Sen
         queryWrapper.orderByDesc(SensorFields::getIsAlter);
         queryWrapper.orderByAsc(SensorFields::getNid);
         rowPage = mapper.selectPage(rowPage, queryWrapper);
-
-        PageResult<SensorFields> pageResult
-                =new PageResult<>(rowPage.getRecords(),rowPage.getTotal());
-
-        return pageResult;
+        return new PageResult<>(rowPage.getRecords(),rowPage.getTotal());
     }
 
     /**
@@ -58,8 +57,26 @@ public class SensorFieldsServiceImpl extends ServiceImpl<SensorFieldsMapper, Sen
     @Override
     public List<SensorFields> getAllSensors() {
         Integer userId= SecurityUtil.getUserId();
-        List<SensorFields> list=mapper.getAllSensors(userId);
-        return list;
+        return mapper.getAllSensors(userId);
+    }
+
+    /**
+     * 更新传感器的信息
+     * @param sensorFieldsUpdateDTO
+     * @return
+     */
+    @Override
+    public boolean updateSensorField(SensorFieldsUpdateDTO sensorFieldsUpdateDTO) {
+        log.info("{}",sensorFieldsUpdateDTO);
+        LambdaQueryWrapper<SensorFields> queryWrapper
+                =new LambdaQueryWrapper<>();
+        queryWrapper.eq(SensorFields::getNid,sensorFieldsUpdateDTO.getSensorId());
+        SensorFields sensorFields=new SensorFields();
+        //设置更新信息
+        sensorFields.setAlterDown(sensorFieldsUpdateDTO.getAlertDown());
+        sensorFields.setAlterTop(sensorFieldsUpdateDTO.getAlertTop());
+        sensorFields.setAlterIntensity(sensorFieldsUpdateDTO.getAlertIntensity());
+        return mapper.update(sensorFields, queryWrapper)>0;
     }
 }
 

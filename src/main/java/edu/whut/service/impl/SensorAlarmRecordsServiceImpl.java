@@ -1,6 +1,9 @@
 package edu.whut.service.impl;
 
+import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import edu.whut.domain.dto.AlarmRecordUpdateDTO;
 import edu.whut.domain.vo.AlarmRecordVO;
 import edu.whut.pojo.SensorAlarmRecords;
 import edu.whut.service.SensorAlarmRecordsService;
@@ -8,6 +11,7 @@ import edu.whut.mapper.SensorAlarmRecordsMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -26,6 +30,25 @@ public class SensorAlarmRecordsServiceImpl extends ServiceImpl<SensorAlarmRecord
         List<AlarmRecordVO> alarmRecordVOS=
                 sensorAlarmRecordsMapper.getAllAlarmRecords(sensorId,size);
         return alarmRecordVOS;
+    }
+
+    @Override
+    public boolean updateAlarmInfo(AlarmRecordUpdateDTO recordUpdateDTO) {
+        //先查看是否存在相关数据
+        if(ObjectUtil.isNotNull(sensorAlarmRecordsMapper.selectById(recordUpdateDTO.getAlarmId()))){
+            LambdaQueryWrapper<SensorAlarmRecords> queryWrapper
+                    =new LambdaQueryWrapper<>();
+            queryWrapper.eq(SensorAlarmRecords::getAid,recordUpdateDTO.getAlarmId());
+            SensorAlarmRecords sensorAlarmRecords
+                    =new SensorAlarmRecords();
+            //修改相关信息
+            sensorAlarmRecords.setClearedTime(LocalDateTime.now());
+            sensorAlarmRecords.setIsCleared(1);
+            sensorAlarmRecords.setClearedDescription(recordUpdateDTO.getAlarmDescription());
+            sensorAlarmRecordsMapper.update(sensorAlarmRecords,queryWrapper);
+            return true;
+        }
+        return false;
     }
 }
 
