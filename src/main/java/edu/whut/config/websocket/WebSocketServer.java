@@ -43,6 +43,7 @@ public class WebSocketServer {
     //保存上一次的数据
     private List<SensorDataVO> sensorDataList=new ArrayList<>();
 
+    //WebSocket需要如此自动注入
     @Autowired
     private static SensorDataMapper sensorDataMapper;
 
