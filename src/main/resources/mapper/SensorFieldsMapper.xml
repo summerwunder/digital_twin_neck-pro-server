@@ -25,7 +25,7 @@
         version,is_deleted
     </sql>
 
-    <select id="getAllSensors" resultType="edu.whut.pojo.SensorFields">
+    <select id="getAllSensors" resultMap="BaseResultMap">
         select sf.*
         from t_sensor_fields sf
                  right join

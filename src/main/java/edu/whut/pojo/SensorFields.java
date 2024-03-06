@@ -3,6 +3,9 @@ package edu.whut.pojo;
 import com.baomidou.mybatisplus.annotation.*;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
 import lombok.Data;
 
 /**
@@ -39,6 +42,7 @@ public class SensorFields implements Serializable {
 
     @TableLogic
     private Integer isDeleted;
+
 
     private static final long serialVersionUID = 1L;
 }

@@ -4,7 +4,9 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
 import edu.whut.domain.dto.DeviceAddDTO;
 import edu.whut.domain.vo.AllDeviceInfoVO;
+import edu.whut.mapper.AlarmActionsMapper;
 import edu.whut.mapper.UserMapDevicesMapper;
+import edu.whut.pojo.AlarmActions;
 import edu.whut.pojo.UserMapDevices;
 import edu.whut.response.PageResult;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -23,10 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 /**
 * @author wunder
@@ -42,7 +41,8 @@ public class DevicesServiceImpl extends ServiceImpl<DevicesMapper, Devices>
     private DevicesMapper devicesMapper;
     @Autowired
     private UserMapDevicesMapper userMapDevicesMapper;
-
+    @Autowired
+    private AlarmActionsMapper alarmActionsMapper;
     /**
      * 删除某个设备
      * @param  deviceId
@@ -71,7 +71,6 @@ public class DevicesServiceImpl extends ServiceImpl<DevicesMapper, Devices>
 
     @Override
     public PageResult getPageDevices(QueryDeviceDTO queryDevice) {
-
         //TODO 此处需要判断是否为当前用户（其实放在前面判断其实更好）
         LambdaQueryWrapper<UserMapDevices> queryUserWrapper = new LambdaQueryWrapper<>();
         queryUserWrapper.eq(UserMapDevices::getUId,SecurityUtil.getUserId());
@@ -104,8 +103,6 @@ public class DevicesServiceImpl extends ServiceImpl<DevicesMapper, Devices>
             BeanUtils.copyProperties(source, target);
             listReturn.add(target);
         }
-
-
         //log.info("listRetrun====>{}"+listReturn);
         PageResult<QueryDeviceVO> pageResult
                 =new PageResult<>(listReturn,rowPage.getTotal());
@@ -121,7 +118,6 @@ public class DevicesServiceImpl extends ServiceImpl<DevicesMapper, Devices>
     public List<AllDeviceInfoVO> queryAllDeviceInfo() {
         Integer userId= SecurityUtil.getUserId();
         List<AllDeviceInfoVO> devicesList=devicesMapper.queryAllDeviceInfo(userId);
-        log.info("查到的数据------->{}",devicesList);
         return devicesList;
     }
 

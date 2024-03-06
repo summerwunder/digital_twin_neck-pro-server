@@ -67,8 +67,8 @@
             <option name="tableUIInfoList">
               <list>
                 <TableUIInfo>
-                  <option name="className" value="SensorAlarmRecords" />
-                  <option name="tableName" value="t_sensor_alarm_records" />
+                  <option name="className" value="AlarmActions" />
+                  <option name="tableName" value="t_alarm_actions" />
                 </TableUIInfo>
               </list>
             </option>

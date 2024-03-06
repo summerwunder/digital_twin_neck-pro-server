@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import edu.whut.domain.dto.SensorFieldsUpdateDTO;
 import edu.whut.domain.vo.QueryDeviceVO;
+import edu.whut.mapper.AlarmActionsMapper;
+import edu.whut.pojo.AlarmActions;
 import edu.whut.pojo.Devices;
 import edu.whut.pojo.SensorFields;
 import edu.whut.response.PageResult;
@@ -19,6 +21,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
 * @author wunder
@@ -32,6 +35,7 @@ public class SensorFieldsServiceImpl extends ServiceImpl<SensorFieldsMapper, Sen
 
     @Autowired
     private SensorFieldsMapper mapper;
+
     @Override
     public PageResult getPageSensors(String sensorName, Integer pageNum, Integer pageSize) {
         //分页参数
@@ -57,7 +61,8 @@ public class SensorFieldsServiceImpl extends ServiceImpl<SensorFieldsMapper, Sen
     @Override
     public List<SensorFields> getAllSensors() {
         Integer userId= SecurityUtil.getUserId();
-        return mapper.getAllSensors(userId);
+        List<SensorFields> sensorFieldsList = mapper.getAllSensors(userId);
+        return sensorFieldsList;
     }
 
     /**

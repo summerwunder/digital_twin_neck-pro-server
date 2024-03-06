@@ -4,17 +4,14 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="edu.whut.mapper.DevicesMapper">
 
-    <resultMap id="BaseResultMap" type="edu.whut.pojo.Devices">
+    <resultMap id="allDeviceInfoMap" type="edu.whut.domain.vo.AllDeviceInfoVO">
             <id property="did" column="did" jdbcType="INTEGER"/>
-            <result property="dNumber" column="d_number" jdbcType="VARCHAR"/>
             <result property="dName" column="d_name" jdbcType="VARCHAR"/>
             <result property="dMark" column="d_mark" jdbcType="VARCHAR"/>
             <result property="dStatus" column="d_status" jdbcType="INTEGER"/>
             <result property="createTime" column="create_time" jdbcType="TIMESTAMP"/>
             <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
             <result property="dIp" column="d_ip" jdbcType="VARCHAR"/>
-            <result property="version" column="version" jdbcType="INTEGER"/>
-            <result property="isDeleted" column="is_deleted" jdbcType="INTEGER"/>
             <collection property="sensorFieldsList" javaType="list" resultMap="edu.whut.mapper.SensorFieldsMapper.BaseResultMap"/>
     </resultMap>
 
@@ -46,7 +43,7 @@
     </select>
 
     <!--此处可以优化，多表查询最好不要超过三张表 -->
-    <select id="queryAllDeviceInfo" resultMap="BaseResultMap">
+    <select id="queryAllDeviceInfo" resultMap="allDeviceInfoMap">
         SELECT
             td.did,
             td.d_name,
