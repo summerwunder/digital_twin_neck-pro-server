@@ -16,4 +16,6 @@ public interface AlarmActionsService extends IService<AlarmActions> {
     boolean addAlarmAction(AlarmActionDTO alarmActionDTO);
 
     List<AlarmActions> getAllAlarmActions();
+
+    boolean delAlarmAction(Integer actionId);
 }

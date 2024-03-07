@@ -1,9 +1,12 @@
 package edu.whut.service.impl;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import edu.whut.domain.dto.AlarmActionDTO;
+import edu.whut.mapper.UserMapAlarmActionsMapper;
 import edu.whut.pojo.AlarmActions;
+import edu.whut.pojo.UserMapAlarmActions;
 import edu.whut.service.AlarmActionsService;
 import edu.whut.mapper.AlarmActionsMapper;
 import edu.whut.utils.security.SecurityUtil;
@@ -26,6 +29,8 @@ public class AlarmActionsServiceImpl extends ServiceImpl<AlarmActionsMapper, Ala
     @Autowired
     private AlarmActionsMapper alarmActionsMapper;
 
+    @Autowired
+    private UserMapAlarmActionsMapper userMapAlarmActionsMapper;
     /**
      * 添加报警对象
      * @param alarmActionDTO
@@ -40,7 +45,25 @@ public class AlarmActionsServiceImpl extends ServiceImpl<AlarmActionsMapper, Ala
         alarmActions.setActionName(alarmActionDTO.getName());
         alarmActions.setActionTopic(alarmActionDTO.getTopic());
         //此处日期为自动注入
-        return  alarmActionsMapper.insert(alarmActions)>0;
+        alarmActionsMapper.insert(alarmActions);
+        //同时需要在用户对应策略表上添加
+        UserMapAlarmActions userMapAlarmActions
+                =new UserMapAlarmActions();
+        userMapAlarmActions.setUserId(SecurityUtil.getUserId());
+        userMapAlarmActions.setAlarmIntensity(0);
+        //此处actionId需要判断
+        LambdaQueryWrapper<AlarmActions> actionsLambdaQueryWrapper
+                =new LambdaQueryWrapper<>();
+        actionsLambdaQueryWrapper.eq(AlarmActions::getActionMsg,alarmActionDTO.getMsg());
+        actionsLambdaQueryWrapper.eq(AlarmActions::getActionName,alarmActionDTO.getName());
+        actionsLambdaQueryWrapper.eq(AlarmActions::getActionQos,alarmActionDTO.getQos());
+        AlarmActions selectedOne = alarmActionsMapper.selectOne(actionsLambdaQueryWrapper);
+        if(ObjectUtil.isNotNull(selectedOne)) {
+            userMapAlarmActions.setAlarmActionId(selectedOne.getId());
+            userMapAlarmActionsMapper.insert(userMapAlarmActions);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -60,6 +83,28 @@ public class AlarmActionsServiceImpl extends ServiceImpl<AlarmActionsMapper, Ala
             }
         }
         return alarmActionsList;
+    }
+
+    /**
+     * 删除告警措施
+     * @return
+     */
+    @Override
+    public boolean delAlarmAction(Integer actionId) {
+        if(ObjectUtil.isNotNull(alarmActionsMapper.selectById(actionId))){
+           //说明存在该要素
+            if(alarmActionsMapper.deleteById(actionId)>0){
+                //此处继续删除对应表的数据
+                LambdaQueryWrapper<UserMapAlarmActions> lambdaQueryWrapper
+                        =new LambdaQueryWrapper<>();
+                lambdaQueryWrapper.eq(UserMapAlarmActions::getAlarmActionId,actionId);
+                lambdaQueryWrapper.eq(UserMapAlarmActions::getUserId,SecurityUtil.getUserId());
+                userMapAlarmActionsMapper.delete(lambdaQueryWrapper);
+                return true;
+            }
+
+        }
+        return false;
     }
 }
 
