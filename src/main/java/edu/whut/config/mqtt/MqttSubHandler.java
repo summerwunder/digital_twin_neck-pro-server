@@ -1,16 +1,14 @@
 package edu.whut.config.mqtt;
 
+import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import edu.whut.mapper.DevicesMapper;
-import edu.whut.mapper.SensorAlarmRecordsMapper;
-import edu.whut.mapper.SensorDataMapper;
-import edu.whut.mapper.SensorFieldsMapper;
-import edu.whut.pojo.Devices;
-import edu.whut.pojo.SensorAlarmRecords;
-import edu.whut.pojo.SensorData;
-import edu.whut.pojo.SensorFields;
+import edu.whut.config.mqtt.gateway.MqttGateway;
+import edu.whut.mapper.*;
+import edu.whut.pojo.*;
+import edu.whut.utils.security.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -35,6 +33,12 @@ public class MqttSubHandler {
     private SensorFieldsMapper sensorFieldsMapper;
     @Autowired
     private SensorAlarmRecordsMapper sensorAlarmRecordsMapper;
+    @Autowired
+    private UserMapAlarmActionsMapper userMapAlarmActionsMapper;
+    @Autowired
+    private AlarmActionsMapper alarmActionsMapper;
+    @Autowired
+    private MqttGateway mqttGateway;
     @Bean
     @ServiceActivator(inputChannel = "mqttInBoundChannel" )
     public MessageHandler mqttInputHandler(){
@@ -80,7 +84,34 @@ public class MqttSubHandler {
                         //如果需要，应该将其放在报警列表中sensorAlarmRecordsMapper
                         //首先需要判断是否超过上限，低于下限
                         if (checkAlarm(data)) {
-                            log.info("有数据超过了阈值");
+                            /**
+                             * 此处需要根据告警反制信息发送MQTT消息
+                             * 1、查询告警反制记录
+                             */
+                            Integer fieldId=data.getFieldId();
+                            //获取字段的告警强度
+                            SensorFields sensorFields = sensorFieldsMapper.selectById(fieldId);
+                            Integer alterIntensity = sensorFields.getAlterIntensity();
+                            LambdaQueryWrapper<UserMapAlarmActions> lambdaQueryWrapper
+                                    =new LambdaQueryWrapper<>();
+                            lambdaQueryWrapper.eq(UserMapAlarmActions::getAlarmIntensity,
+                                    alterIntensity);
+                            //获取所有的报警事件
+                            List<UserMapAlarmActions> userMapAlarmActions =
+                                    userMapAlarmActionsMapper.selectList(lambdaQueryWrapper);
+                            //从中获取所有的alarmId
+                            List<Integer> alarmIdList =
+                                    userMapAlarmActions.stream().map(UserMapAlarmActions::getAlarmActionId).toList();
+                            if(ObjectUtil.isNotEmpty(alarmIdList)){
+                                //确保不会为空
+                                LambdaQueryWrapper<AlarmActions> alarmActionsWrapper =new LambdaQueryWrapper<>();
+                                alarmActionsWrapper.in(AlarmActions::getId,alarmIdList);
+                                List<AlarmActions> alarmActionsList =
+                                        alarmActionsMapper.selectList(alarmActionsWrapper);
+                                for(AlarmActions alarmActions:alarmActionsList){
+                                    sendMqttMsg(alarmActions);
+                                }
+                            }
                         }
                     }
                 } catch (JsonProcessingException e) {
@@ -102,6 +133,10 @@ public class MqttSubHandler {
         Double value= sensorData.getValueNum();
         //获取字段的上下阈值
         SensorFields sensorFields = sensorFieldsMapper.selectById(fieldId);
+        if(sensorFields.getAlterIntensity().equals(0)){
+            //此时标识没有设置报警功能
+            return false;
+        }
         Double valueTop=sensorFields.getAlterTop();
         Double valueDown=sensorFields.getAlterDown();
         if(value<valueDown||value>valueTop){
@@ -116,8 +151,20 @@ public class MqttSubHandler {
             records.setFieldId(fieldId);
             records.setAlarmTime(LocalDateTime.now());
             records.setAlarmDescription(sensorFields.getAlterDescription());
+            //记录告警记录
             return sensorAlarmRecordsMapper.insert(records) > 0;
         }
         return false;
+    }
+
+    /**
+     * 根据alarmAction的要求发送MQTT消息
+     * @param alarmActions
+     */
+    private void sendMqttMsg(AlarmActions alarmActions){
+        String actionMsg = alarmActions.getActionMsg();
+        String actionTopic=alarmActions.getActionTopic();
+        int actionQos=alarmActions.getActionQos();
+        mqttGateway.sendToMqtt(actionMsg,actionTopic,actionQos);
     }
 }

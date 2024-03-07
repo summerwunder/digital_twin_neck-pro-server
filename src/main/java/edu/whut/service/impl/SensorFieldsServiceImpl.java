@@ -7,9 +7,11 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import edu.whut.domain.dto.SensorFieldsUpdateDTO;
 import edu.whut.domain.vo.QueryDeviceVO;
 import edu.whut.mapper.AlarmActionsMapper;
+import edu.whut.mapper.UserMapSensorsMapper;
 import edu.whut.pojo.AlarmActions;
 import edu.whut.pojo.Devices;
 import edu.whut.pojo.SensorFields;
+import edu.whut.pojo.UserMapSensors;
 import edu.whut.response.PageResult;
 import edu.whut.service.SensorFieldsService;
 import edu.whut.mapper.SensorFieldsMapper;
@@ -20,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -36,12 +39,27 @@ public class SensorFieldsServiceImpl extends ServiceImpl<SensorFieldsMapper, Sen
     @Autowired
     private SensorFieldsMapper mapper;
 
+    @Autowired
+    private UserMapSensorsMapper userMapSensorsMapper;
     @Override
     public PageResult getPageSensors(String sensorName, Integer pageNum, Integer pageSize) {
         //分页参数
         Page<SensorFields> rowPage = new Page(pageNum,pageSize);
+        Integer userId = SecurityUtil.getUserId();
+        //此处需要先判断用户
+        LambdaQueryWrapper<UserMapSensors> sensorsLambdaQueryWrapper
+                =new LambdaQueryWrapper<>();
+        sensorsLambdaQueryWrapper.eq(UserMapSensors::getUId,userId);
+        List<Integer> sensorIds = userMapSensorsMapper.selectList(sensorsLambdaQueryWrapper).stream()
+                .map(UserMapSensors::getSId).toList();
+        // 如果sensorIds为空，则直接返回空结果集
+        if (sensorIds.isEmpty()) {
+            return new PageResult<>(Collections.emptyList(), 0);
+        }
         //queryWrapper组装查询where条件
         LambdaQueryWrapper<SensorFields> queryWrapper = new LambdaQueryWrapper<>();
+        //判断是哪个用户创建的
+        queryWrapper.in(SensorFields::getNid,sensorIds);
         //是否要查询特殊字段
         if(ObjectUtil.isNotEmpty(sensorName)&&(!sensorName.equals("null"))){
             queryWrapper.eq(SensorFields::getNName,sensorName);

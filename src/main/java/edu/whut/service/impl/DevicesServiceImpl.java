@@ -77,6 +77,10 @@ public class DevicesServiceImpl extends ServiceImpl<DevicesMapper, Devices>
         List<UserMapDevices> mapDevicesList = userMapDevicesMapper.selectList(queryUserWrapper);
         //存储了当前用户的设备编号信息
         List<Integer> didList = mapDevicesList.stream().map(UserMapDevices::getDId).toList();
+        // 如果didList为空，则直接返回空结果集
+        if (didList.isEmpty()) {
+            return new PageResult<>(Collections.emptyList(), 0);
+        }
         //分页参数
         Page<Devices> rowPage = new Page(queryDevice.getPageNum().longValue(),
                 queryDevice.getPageSize().longValue());

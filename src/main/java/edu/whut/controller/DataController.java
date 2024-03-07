@@ -48,7 +48,7 @@ public class DataController {
 
     @PostMapping("publish")
     public String publish(@RequestBody String data){
-        gateway.sendToMqttWithTopic(data,"topic/1");
+        gateway.sendToMqtt(data,"topic/1");
         return "ok";
     }
 }
