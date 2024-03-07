@@ -6,6 +6,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.whut.config.mqtt.gateway.MqttGateway;
+import edu.whut.exception.ServiceException;
 import edu.whut.mapper.*;
 import edu.whut.pojo.*;
 import edu.whut.utils.security.SecurityUtil;
@@ -35,6 +36,8 @@ public class MqttSubHandler {
     private SensorAlarmRecordsMapper sensorAlarmRecordsMapper;
     @Autowired
     private UserMapAlarmActionsMapper userMapAlarmActionsMapper;
+    @Autowired
+    private UserMapDevicesMapper userMapDevicesMapper;
     @Autowired
     private AlarmActionsMapper alarmActionsMapper;
     @Autowired
@@ -72,14 +75,6 @@ public class MqttSubHandler {
                     //此处自动填充不可用！！！手动添加
                     LocalDateTime currentTime = LocalDateTime.now();
                     for (SensorData data : sensorDataList) {
-                        data.setUpdateTime(currentTime);
-                        // 将数据插入数据库
-                        dataMapper.insert(data);
-                        //此处需要修改物联网设备的更新时间
-                        Devices devices=new Devices();
-                        devices.setUpdateTime(LocalDateTime.now());
-                        devices.setDid(data.getDeviceId());
-                        devicesMapper.updateById(devices);
                         //此处需要设置是否数据需要报警
                         //如果需要，应该将其放在报警列表中sensorAlarmRecordsMapper
                         //首先需要判断是否超过上限，低于下限
@@ -89,11 +84,25 @@ public class MqttSubHandler {
                              * 1、查询告警反制记录
                              */
                             Integer fieldId=data.getFieldId();
+                            Integer deviceId=data.getDeviceId();
+                            //获取用户的ID ---- 可以先从deviceId下手--- 获取userId  （通过UserMapDevice）
+                            LambdaQueryWrapper<UserMapDevices> userMapDevicesLambdaQueryWrapper
+                                    =new LambdaQueryWrapper<>();
+                            userMapDevicesLambdaQueryWrapper.eq(UserMapDevices::getDId,deviceId);
+                            Integer userId =
+                                    userMapDevicesMapper.selectOne(userMapDevicesLambdaQueryWrapper).getUId();
+                            if(ObjectUtil.isNull(userId)){
+                                throw new ServiceException("填写的数据错误");
+                            }
                             //获取字段的告警强度
                             SensorFields sensorFields = sensorFieldsMapper.selectById(fieldId);
+                            if(ObjectUtil.isNull(sensorFields)){
+                                throw new ServiceException("填写的数据错误");
+                            }
                             Integer alterIntensity = sensorFields.getAlterIntensity();
                             LambdaQueryWrapper<UserMapAlarmActions> lambdaQueryWrapper
                                     =new LambdaQueryWrapper<>();
+                            lambdaQueryWrapper.eq(UserMapAlarmActions::getUserId,userId);
                             lambdaQueryWrapper.eq(UserMapAlarmActions::getAlarmIntensity,
                                     alterIntensity);
                             //获取所有的报警事件
@@ -113,6 +122,14 @@ public class MqttSubHandler {
                                 }
                             }
                         }
+                        data.setUpdateTime(currentTime);
+                        // 将数据插入数据库
+                        dataMapper.insert(data);
+                        //此处需要修改物联网设备的更新时间
+                        Devices devices=new Devices();
+                        devices.setUpdateTime(LocalDateTime.now());
+                        devices.setDid(data.getDeviceId());
+                        devicesMapper.updateById(devices);
                     }
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);

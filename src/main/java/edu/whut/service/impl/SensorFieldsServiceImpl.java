@@ -4,6 +4,7 @@ import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import edu.whut.domain.dto.SensorFieldAddDTO;
 import edu.whut.domain.dto.SensorFieldsUpdateDTO;
 import edu.whut.domain.vo.QueryDeviceVO;
 import edu.whut.mapper.AlarmActionsMapper;
@@ -90,7 +91,7 @@ public class SensorFieldsServiceImpl extends ServiceImpl<SensorFieldsMapper, Sen
      */
     @Override
     public boolean updateSensorField(SensorFieldsUpdateDTO sensorFieldsUpdateDTO) {
-        log.info("{}",sensorFieldsUpdateDTO);
+        //log.info("{}",sensorFieldsUpdateDTO);
         LambdaQueryWrapper<SensorFields> queryWrapper
                 =new LambdaQueryWrapper<>();
         queryWrapper.eq(SensorFields::getNid,sensorFieldsUpdateDTO.getSensorId());
@@ -100,6 +101,50 @@ public class SensorFieldsServiceImpl extends ServiceImpl<SensorFieldsMapper, Sen
         sensorFields.setAlterTop(sensorFieldsUpdateDTO.getAlertTop());
         sensorFields.setAlterIntensity(sensorFieldsUpdateDTO.getAlertIntensity());
         return mapper.update(sensorFields, queryWrapper)>0;
+    }
+
+    /**
+     * 添加传感器的字段信息
+     * @param sensorFieldAddDTO
+     * @return
+     */
+    @Override
+    public boolean addSensorField(SensorFieldAddDTO sensorFieldAddDTO) {
+        // 首先判断字段名是否相同
+        LambdaQueryWrapper<SensorFields> fieldsLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        fieldsLambdaQueryWrapper.eq(SensorFields::getNName, sensorFieldAddDTO.getFieldName());
+        SensorFields originSensorFields = mapper.selectOne(fieldsLambdaQueryWrapper);
+        // 如果找到了同名的传感器字段
+        if (ObjectUtil.isNotNull(originSensorFields)) {
+            // 判断是否是当前用户的字段名
+            LambdaQueryWrapper<UserMapSensors> userMapSensorsLambdaQueryWrapper = new LambdaQueryWrapper<>();
+            userMapSensorsLambdaQueryWrapper.eq(UserMapSensors::getSId, originSensorFields.getNid());
+            UserMapSensors userMapSensors = userMapSensorsMapper.selectOne(userMapSensorsLambdaQueryWrapper);
+            // 如果是当前用户的字段名，则返回 false
+            if (ObjectUtil.isNotNull(userMapSensors) && userMapSensors.getUId().equals(SecurityUtil.getUserId())) {
+                return false;
+            }
+        }
+        // 创建新的传感器字段对象
+        SensorFields sensorFields = new SensorFields();
+        sensorFields.setAlterIntensity(sensorFieldAddDTO.getAlertIntensity());
+        sensorFields.setAlterDown(sensorFieldAddDTO.getAlertDown());
+        sensorFields.setAlterDescription(sensorFieldAddDTO.getAlertMark());
+        sensorFields.setAlterTop(sensorFieldAddDTO.getAlertTop());
+        sensorFields.setIsAlter(sensorFieldAddDTO.getIsAlert());
+        sensorFields.setNName(sensorFieldAddDTO.getFieldName());
+        sensorFields.setNDescription(sensorFieldAddDTO.getFieldDescription());
+        sensorFields.setNUnit(sensorFieldAddDTO.getFieldUnit());
+
+        // 插入新的传感器字段
+        mapper.insert(sensorFields);
+
+        // 添加到用户传感器对应表
+        UserMapSensors userMapSensors = new UserMapSensors();
+        userMapSensors.setUId(SecurityUtil.getUserId());
+        userMapSensors.setSId(sensorFields.getNid()); // 直接使用新插入的传感器字段的nid属性
+        userMapSensorsMapper.insert(userMapSensors);
+        return true; // 返回 true 表示添加成功
     }
 }
 

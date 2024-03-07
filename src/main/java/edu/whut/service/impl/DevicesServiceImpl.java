@@ -151,13 +151,15 @@ public class DevicesServiceImpl extends ServiceImpl<DevicesMapper, Devices>
         LocalDateTime now=LocalDateTime.now();
         device.setCreateTime(now);
         device.setUpdateTime(now);
+        // 插入设备信息
         devicesMapper.insert(device);
-        //获取设备Id号
-        Integer deviceId = devicesMapper.selectOne(lambdaQueryWrapper).getDid();
-        //同时在设备用户映射表中添加
-        UserMapDevices userMapDevices=new UserMapDevices();
+
+        // 创建设备用户映射对象并插入到数据库
+        UserMapDevices userMapDevices = new UserMapDevices();
         userMapDevices.setUId(SecurityUtil.getUserId());
-        userMapDevices.setDId(deviceId);
+        userMapDevices.setDId(device.getDid()); // 直接使用新插入的设备的Did属性
+        // 插入用户设备映射关系
+        // 返回插入操作是否成功
         return userMapDevicesMapper.insert(userMapDevices);
     }
 }

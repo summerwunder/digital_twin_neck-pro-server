@@ -3,9 +3,9 @@ package edu.whut.controller;
 import cn.hutool.core.util.ObjectUtil;
 import edu.whut.domain.dto.AddLinkDTO;
 import edu.whut.domain.dto.AlarmRecordUpdateDTO;
+import edu.whut.domain.dto.SensorFieldAddDTO;
 import edu.whut.domain.dto.SensorFieldsUpdateDTO;
 import edu.whut.domain.vo.AlarmRecordVO;
-import edu.whut.pojo.SensorAlarmRecords;
 import edu.whut.pojo.SensorFields;
 import edu.whut.response.PageResult;
 import edu.whut.response.Result;
@@ -98,5 +98,18 @@ public class SensorFieldController {
         }else{
             return Result.success("操作失败");
         }
+    }
+
+    /**
+     * 添加传感器的字段
+     * @return
+     */
+    @PostMapping
+    public Result addSensorField(@RequestBody SensorFieldAddDTO sensorFieldAddDTO){
+        boolean isOk=sensorFieldsService.addSensorField(sensorFieldAddDTO);
+        if(isOk){
+            return Result.success("添加成功");
+        }
+        return Result.success("字段名不能一样，添加失败");
     }
 }
