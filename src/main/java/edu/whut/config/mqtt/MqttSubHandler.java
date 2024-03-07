@@ -1,6 +1,8 @@
 package edu.whut.config.mqtt;
 
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.json.JSONArray;
+import cn.hutool.json.JSONException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -20,6 +22,7 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -70,8 +73,14 @@ public class MqttSubHandler {
                               "valueStr":null
                             }]
                      */
-                    List<SensorData> sensorDataList =
-                            mapper.readValue(message.getPayload().toString(), new TypeReference<List<SensorData>>(){});
+                    List<SensorData> sensorDataList =new ArrayList<>();
+                    //首先判断是不是数组
+                    try {
+                        JSONArray jsonArray = new JSONArray(message.getPayload().toString());
+                        sensorDataList= mapper.readValue(message.getPayload().toString(), new TypeReference<List<SensorData>>(){});
+                    } catch (JSONException e) {
+                        throw new RuntimeException();
+                    }
                     //此处自动填充不可用！！！手动添加
                     LocalDateTime currentTime = LocalDateTime.now();
                     for (SensorData data : sensorDataList) {

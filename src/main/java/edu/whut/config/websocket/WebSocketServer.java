@@ -46,7 +46,6 @@ public class WebSocketServer {
     //WebSocket需要如此自动注入
     @Autowired
     private static SensorDataMapper sensorDataMapper;
-
     @Autowired
     public void setSensorDataMapper(SensorDataMapper  sensorDataMapper) {
         WebSocketServer.sensorDataMapper = sensorDataMapper;
@@ -69,6 +68,9 @@ public class WebSocketServer {
             //加入set中
             webSocketMap.put(userId,this);
         }
+        /**
+         * 按照一定事件发送消息
+         */
         scheduler.scheduleAtFixedRate(() -> {
                     try {
                         sendSensorData();
