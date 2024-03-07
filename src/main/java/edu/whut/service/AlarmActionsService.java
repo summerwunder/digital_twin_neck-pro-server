@@ -1,6 +1,7 @@
 package edu.whut.service;
 
 import edu.whut.domain.dto.AlarmActionDTO;
+import edu.whut.domain.dto.AlarmActoinBindDTO;
 import edu.whut.pojo.AlarmActions;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -18,4 +19,6 @@ public interface AlarmActionsService extends IService<AlarmActions> {
     List<AlarmActions> getAllAlarmActions();
 
     boolean delAlarmAction(Integer actionId);
+
+    void bindAlarmAction(AlarmActoinBindDTO alarmActoinBindDTO);
 }

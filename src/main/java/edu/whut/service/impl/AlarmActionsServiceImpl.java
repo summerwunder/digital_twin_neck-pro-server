@@ -4,18 +4,19 @@ import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import edu.whut.domain.dto.AlarmActionDTO;
+import edu.whut.domain.dto.AlarmActoinBindDTO;
 import edu.whut.mapper.UserMapAlarmActionsMapper;
 import edu.whut.pojo.AlarmActions;
 import edu.whut.pojo.UserMapAlarmActions;
+import edu.whut.response.Result;
 import edu.whut.service.AlarmActionsService;
 import edu.whut.mapper.AlarmActionsMapper;
 import edu.whut.utils.security.SecurityUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
 * @author wunder
@@ -105,6 +106,72 @@ public class AlarmActionsServiceImpl extends ServiceImpl<AlarmActionsMapper, Ala
 
         }
         return false;
+    }
+
+    /**
+     * 绑定强度
+     * @param alarmActoinBindDTO
+     */
+    @Override
+    public void bindAlarmAction(AlarmActoinBindDTO alarmActoinBindDTO) {
+        Integer userId=SecurityUtil.getUserId();
+        //先找到所有的alarmId和强度的对应关系
+        LambdaQueryWrapper<UserMapAlarmActions> lambdaQueryWrapper
+                =new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(UserMapAlarmActions::getAlarmActionId,
+                alarmActoinBindDTO.getAlarmActionId());
+        lambdaQueryWrapper.eq(UserMapAlarmActions::getUserId,userId);
+        List<UserMapAlarmActions> userMapAlarmActions =
+                userMapAlarmActionsMapper.selectList(lambdaQueryWrapper);
+        //获取所有的强度
+        List<Integer> intensityList =
+                userMapAlarmActions.stream().map(UserMapAlarmActions::getAlarmIntensity).toList();
+        //转换为Set进行快速查找
+        Set<Integer> originSet=new HashSet<>(intensityList);
+        Set<Integer> newSet=new HashSet<>(alarmActoinBindDTO.getAlarmIntensity());
+        //需要删除的元素
+        List<Integer> removeList=new ArrayList<>();
+        // 检查要删除的元素
+        for (Integer element : originSet) {
+            if (!newSet.contains(element)) {
+                removeList.add(element);
+            }
+        }
+        //先删除元素
+        if (!removeList.isEmpty()) {
+            LambdaQueryWrapper<UserMapAlarmActions> wrapper
+                    = new LambdaQueryWrapper<>();
+            wrapper.eq(UserMapAlarmActions::getAlarmActionId,
+                    alarmActoinBindDTO.getAlarmActionId());
+            wrapper.eq(UserMapAlarmActions::getUserId, userId);
+            wrapper.in(UserMapAlarmActions::getAlarmIntensity, removeList);
+            userMapAlarmActionsMapper.delete(wrapper);
+        }
+        // 添加元素
+        List<UserMapAlarmActions> toInsert = newSet.stream()
+                .filter(element -> !originSet.contains(element))
+                .map(intensity -> {
+                    UserMapAlarmActions action = new UserMapAlarmActions();
+                    action.setUserId(userId);
+                    action.setAlarmActionId(alarmActoinBindDTO.getAlarmActionId());
+                    action.setAlarmIntensity(intensity);
+                    return action;
+                })
+                .collect(Collectors.toList());
+        if(ObjectUtil.isNotEmpty(toInsert)) {
+            for (UserMapAlarmActions action : toInsert) {
+                userMapAlarmActionsMapper.insert(action);
+            }
+        }
+        //如果没有任何值，说明未确定
+        if(ObjectUtil.isEmpty(alarmActoinBindDTO.getAlarmIntensity())){
+            //此处表明要将强度设置为0
+            UserMapAlarmActions userActions=new UserMapAlarmActions();
+            userActions.setAlarmActionId(alarmActoinBindDTO.getAlarmActionId());
+            userActions.setUserId(userId);
+            userActions.setAlarmIntensity(0);
+            userMapAlarmActionsMapper.insert(userActions);
+        }
     }
 }
 

@@ -3,6 +3,7 @@ package edu.whut.controller;
 import cn.hutool.core.util.ObjectUtil;
 import edu.whut.constants.HttpStatus;
 import edu.whut.domain.dto.AlarmActionDTO;
+import edu.whut.domain.dto.AlarmActoinBindDTO;
 import edu.whut.pojo.AlarmActions;
 import edu.whut.response.Result;
 import edu.whut.service.AlarmActionsService;
@@ -48,5 +49,16 @@ public class AlarmActionController {
             return Result.success("删除成功");
         }
         return Result.success("删除失败");
+    }
+
+    /**
+     * 修改报警反制措施对应的等级
+     * @param alarmActoinBindDTO
+     * @return
+     */
+    @PatchMapping
+    public Result bindAlarmAction(@RequestBody AlarmActoinBindDTO alarmActoinBindDTO){
+        alarmActionsService.bindAlarmAction(alarmActoinBindDTO);
+        return Result.success("绑定成功");
     }
 }
