@@ -2,12 +2,14 @@ package edu.whut.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.ObjectUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.baomidou.mybatisplus.extension.conditions.update.LambdaUpdateChainWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import edu.whut.config.security.SysUserServiceDetail;
 import edu.whut.constants.HttpStatus;
 import edu.whut.domain.dto.LoginUserDTO;
+import edu.whut.domain.dto.RegisterUserDTO;
 import edu.whut.domain.vo.LoginUserVO;
 import edu.whut.domain.vo.UserInfoVO;
 import edu.whut.exception.ServiceException;
@@ -25,6 +27,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.parameters.P;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -46,6 +49,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     private JwtHelper jwtHelper;
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     @Override
     public String checkUserPwd(LoginUserDTO loginUser, HttpServletRequest request) {
         UsernamePasswordAuthenticationToken authentication
@@ -77,6 +82,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return token;
     }
 
+
+    /**
+     * 获取用户的个人信息
+     * @return
+     */
     @Override
     public UserInfoVO getUserInfo() {
         Integer id= SecurityUtil.getUserId();
@@ -88,6 +98,30 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         UserInfoVO userInfoVO = new UserInfoVO();
         BeanUtil.copyProperties(user,userInfoVO);
         return userInfoVO;
+    }
+
+    @Override
+    public boolean registerForUser(RegisterUserDTO registerUserDTO) {
+        //首先检索是否存在相同用户名
+        LambdaQueryWrapper<User> lambdaQueryWrapper=
+                new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(User::getUserName,registerUserDTO.getUsername());
+        if(ObjectUtil.isNotNull(userMapper.selectOne(lambdaQueryWrapper))){
+            //说明存在相同用户名
+            return false;
+        }
+        //设置秘文
+        String userPassword = passwordEncoder.encode(registerUserDTO.getUserpwd());
+        //创建新的用户
+        User user=new User();
+        user.setUserName(registerUserDTO.getUsername());
+        user.setUserPwd(userPassword);
+        user.setEmail(registerUserDTO.getUseremail());
+        user.setUserNickname(registerUserDTO.getNickname());
+        user.setLoginTime(null);
+        user.setLoginIp(null);
+        userMapper.insert(user);
+        return true;
     }
 }
 

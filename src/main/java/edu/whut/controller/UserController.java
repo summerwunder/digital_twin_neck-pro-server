@@ -2,6 +2,7 @@ package edu.whut.controller;
 
 import edu.whut.constants.HttpStatus;
 import edu.whut.domain.dto.LoginUserDTO;
+import edu.whut.domain.dto.RegisterUserDTO;
 import edu.whut.domain.vo.LoginUserVO;
 import edu.whut.domain.vo.UserInfoVO;
 import edu.whut.response.Result;
@@ -34,7 +35,16 @@ public class UserController {
         map.put("token",token);
         return Result.success("登录成功",map);
     }
+    @PostMapping("register")
+    public Result getRegister(@RequestBody RegisterUserDTO registerUserDTO){
+        boolean isOk=userService.registerForUser(registerUserDTO);
+        if(isOk){
+            return Result.success("注册成功");
+        }else{
+            return Result.success("已存在相同的用户名，请修改");
+        }
 
+    }
     @GetMapping("info")
     public Result getUserInfo(){
         //获取用户信息

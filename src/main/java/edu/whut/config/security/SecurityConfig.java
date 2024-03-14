@@ -32,6 +32,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(
                 auth-> auth.requestMatchers(HttpMethod.POST,"/sys/user/login").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/sys/user/register").permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         .anyRequest().authenticated());
         //禁用session
@@ -65,6 +66,7 @@ public class SecurityConfig {
         return new ProviderManager(authenticationProvider);
     }
 
+    @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }

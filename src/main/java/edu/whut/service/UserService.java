@@ -1,6 +1,7 @@
 package edu.whut.service;
 
 import edu.whut.domain.dto.LoginUserDTO;
+import edu.whut.domain.dto.RegisterUserDTO;
 import edu.whut.domain.vo.LoginUserVO;
 import edu.whut.domain.vo.UserInfoVO;
 import edu.whut.pojo.User;
@@ -18,4 +19,6 @@ public interface UserService extends IService<User> {
     String checkUserPwd(LoginUserDTO loginUser, HttpServletRequest request);
 
     UserInfoVO getUserInfo();
+
+    boolean registerForUser(RegisterUserDTO registerUserDTO);
 }

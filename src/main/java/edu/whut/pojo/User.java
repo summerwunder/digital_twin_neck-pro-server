@@ -32,5 +32,7 @@ public class User implements Serializable {
     //@TableField(fill = FieldFill.UPDATE)
     private LocalDateTime loginTime;
 
+    private String email;
+
     private static final long serialVersionUID = 1L;
 }
