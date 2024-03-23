@@ -1,12 +1,12 @@
 package edu.whut.controller;
 
-import cn.hutool.core.util.ObjectUtil;
-import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.context.AnalysisContext;
-import com.alibaba.excel.event.AnalysisEventListener;
-import edu.whut.domain.temp.Dot;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.whut.config.websocket.WebSocketExcelServer;
 import edu.whut.pojo.DotInfo;
 import edu.whut.response.Result;
+import edu.whut.utils.excel.ExcelReaderUtils;
+import edu.whut.utils.security.SecurityUtil;
+import jakarta.websocket.Session;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,15 +20,13 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
 @RequestMapping("test")
 @Slf4j
 public class TestController {
-    @Autowired
-    private ResourceLoader resourceLoader;
+
     /**
      * 此处测试运行python程序
      */
@@ -59,28 +57,7 @@ public class TestController {
 
     @GetMapping("excel")
     public Result getExcelData() throws IOException {
-        Resource resource = resourceLoader.getResource("classpath:dots.xlsx");
-        File file = resource.getFile();
-        //ExcelReaderUtils.getDotInfoList(file.getAbsolutePath());
-        /*List<DotInfo> dotInfoList =
-                ExcelReaderUtils.getDotInfoList(file.getAbsolutePath());*/
-        List<DotInfo> dots=new ArrayList<>();
-        EasyExcel.read(file.getAbsolutePath(), Dot.class, new AnalysisEventListener<Dot>() {
-            @Override
-            public void invoke(Dot dot, AnalysisContext analysisContext) {
-                DotInfo dotInfo = new DotInfo();
-                BeanUtils.copyProperties(dot,dotInfo);
-                dots.add(dotInfo);
-            }
-
-            @Override
-            public void doAfterAllAnalysed(AnalysisContext analysisContext) {
-                log.info("{}","加载完毕");
-            }
-        }).sheet(0).doRead();
-        log.info("dots(size)----{}",dots.size());
-
-        return Result.success(dots);
+        return Result.error();
     }
 
 }
