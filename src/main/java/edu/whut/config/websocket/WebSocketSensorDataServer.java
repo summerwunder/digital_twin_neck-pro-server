@@ -30,14 +30,14 @@ import java.util.concurrent.TimeUnit;
 @Component
 @Slf4j
 @ServerEndpoint("/ws/message/{userId}/{deviceId}")
-public class WebSocketServer {
+public class WebSocketSensorDataServer {
     private Session session;
     /**concurrent包的线程安全Set，用来存放每个客户端对应的WebSocket对象。*/
     private Integer userId;
 
     private Integer deviceId;
 
-    private static ConcurrentHashMap<Integer,WebSocketServer> webSocketMap=
+    private static ConcurrentHashMap<Integer, WebSocketSensorDataServer> webSocketMap=
             new ConcurrentHashMap();
 
     //保存上一次的数据
@@ -47,8 +47,8 @@ public class WebSocketServer {
     @Autowired
     private static SensorDataMapper sensorDataMapper;
     @Autowired
-    public void setSensorDataMapper(SensorDataMapper  sensorDataMapper) {
-        WebSocketServer.sensorDataMapper = sensorDataMapper;
+    public void setSensorDataMapper(SensorDataMapper sensorDataMapper) {
+        WebSocketSensorDataServer.sensorDataMapper = sensorDataMapper;
     }
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
@@ -72,14 +72,14 @@ public class WebSocketServer {
          * 按照一定事件发送消息
          */
         scheduler.scheduleAtFixedRate(() -> {
-                    try {
-                        sendSensorData();
-                    } catch (JsonProcessingException e) {
-                        log.error(e.getMessage());
-                        throw new RuntimeException(e);
-                    }
-                },
-                0, 1, TimeUnit.SECONDS);
+            try {
+                sendSensorData();
+            } catch (JsonProcessingException e) {
+                log.error(e.getMessage());
+                throw new RuntimeException(e);
+            }
+        },
+        0, 1, TimeUnit.SECONDS);
         log.info("连接成功，deviceId"+deviceId+"-----userId:"+userId);
         //sendMessage("连接成功");
     }
@@ -168,6 +168,7 @@ public class WebSocketServer {
         objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
         objectMapper.registerModule(new JavaTimeModule());
         String str = objectMapper.writeValueAsString(sensorDataList);
+        log.warn(str);
         this.sendMessage(str);
     }
 }

@@ -33,6 +33,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(
                 auth-> auth.requestMatchers(HttpMethod.POST,"/sys/user/login").permitAll()
                         .requestMatchers(HttpMethod.POST,"/sys/user/register").permitAll()
+                        .requestMatchers("/test/**").permitAll()
                         .requestMatchers("/ws/**").permitAll()
                         .anyRequest().authenticated());
         //禁用session
