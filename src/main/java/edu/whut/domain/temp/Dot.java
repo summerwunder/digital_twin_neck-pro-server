@@ -14,12 +14,12 @@ import lombok.ToString;
 public class Dot {
     @ExcelIgnore
     private Long id;
-    @ExcelProperty(value="x")
+    @ExcelProperty(index = 1)
     private Double x;
-    @ExcelProperty(value="y")
+    @ExcelProperty(index = 2)
     private Double y;
-    @ExcelProperty(value="z")
+    @ExcelProperty(index = 3)
     private Double z;
-    @ExcelProperty(value="val")
+    @ExcelProperty(index = 4)
     private Double data;
 }

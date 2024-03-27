@@ -11,6 +11,7 @@ import edu.whut.config.mqtt.gateway.MqttGateway;
 import edu.whut.exception.ServiceException;
 import edu.whut.mapper.*;
 import edu.whut.pojo.*;
+import edu.whut.utils.python.PythonHelper;
 import edu.whut.utils.security.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +55,6 @@ public class MqttSubHandler {
                 //System.out.println(message);
                 //System.out.println("收到订阅消息：消息主题"+message.getHeaders().get("mqtt_receivedTopic").toString());
                 //System.out.println("消息内容"+message.getPayload().toString());
-
                 ObjectMapper mapper=new ObjectMapper();
                 try {
                     //MQTT消息为数组，
@@ -76,7 +76,7 @@ public class MqttSubHandler {
                     List<SensorData> sensorDataList =new ArrayList<>();
                     //首先判断是不是数组
                     try {
-                        JSONArray jsonArray = new JSONArray(message.getPayload().toString());
+                        //JSONArray jsonArray = new JSONArray(message.getPayload().toString());
                         sensorDataList= mapper.readValue(message.getPayload().toString(), new TypeReference<List<SensorData>>(){});
                     } catch (JSONException e) {
                         throw new RuntimeException();
@@ -127,6 +127,7 @@ public class MqttSubHandler {
                                 List<AlarmActions> alarmActionsList =
                                         alarmActionsMapper.selectList(alarmActionsWrapper);
                                 for(AlarmActions alarmActions:alarmActionsList){
+                                    // 此处发出告警信号
                                     sendMqttMsg(alarmActions);
                                 }
                             }
@@ -139,6 +140,11 @@ public class MqttSubHandler {
                         devices.setUpdateTime(LocalDateTime.now());
                         devices.setDid(data.getDeviceId());
                         devicesMapper.updateById(devices);
+                        //TODO 此处将数据信息发送至SOCKET
+                        //此处默认只传送力传感器的数据，后续需要重新设计表数据
+                        if(data.getFieldId().equals(3)){
+                            invokePython(data.getValueNum());
+                        }
                     }
                 } catch (JsonProcessingException e) {
                     throw new RuntimeException(e);
@@ -192,5 +198,17 @@ public class MqttSubHandler {
         String actionTopic=alarmActions.getActionTopic();
         int actionQos=alarmActions.getActionQos();
         mqttGateway.sendToMqtt(actionMsg,actionTopic,actionQos);
+    }
+
+    /**
+     * 执行python脚本，向远程服务器发送数据
+     * @param val
+     */
+    public void invokePython(Double val){
+        log.info("force  == {}",val);
+        //此处将力传感器数据送至python执行socket代码
+        if(PythonHelper.sendDgramData(val)){
+            log.info("运行python脚本成功");
+        }
     }
 }

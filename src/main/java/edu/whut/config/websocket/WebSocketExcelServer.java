@@ -2,6 +2,7 @@ package edu.whut.config.websocket;
 
 import cn.hutool.core.util.ObjectUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import edu.whut.constants.ConnectConstants;
 import edu.whut.constants.HttpStatus;
 import edu.whut.exception.ServiceException;
 import edu.whut.mapper.SensorDataMapper;
@@ -104,12 +105,13 @@ public class WebSocketExcelServer {
         }
     }
 
+    /**
+     * 发送数据的主要函数
+     * @throws IOException
+     */
     public void sendWebInfo() throws IOException {
-        Resource resource = resourceLoader.getResource("classpath:dots.xlsx");
+        Resource resource = resourceLoader.getResource(ConnectConstants.excelPath);
         File file = resource.getFile();
-        //ExcelReaderUtils.getDotInfoList(file.getAbsolutePath());
-        /*List<DotInfo> dotInfoList =
-                ExcelReaderUtils.getDotInfoList(file.getAbsolutePath());*/
         //获取点云数据
         List<DotInfo> dots= ExcelReaderUtils.getDotInfoList(file);
         ObjectMapper objectMapper=new ObjectMapper();

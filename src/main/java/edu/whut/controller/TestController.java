@@ -30,34 +30,5 @@ public class TestController {
     /**
      * 此处测试运行python程序
      */
-    @GetMapping("python")
-    public void invokePython(){
-        String[] arguments=new String[]{"/Users/wunder/PycharmProjects/testPython/vene/bin/python3.12",
-                "/Users/wunder/PycharmProjects/testPython/08-plus.py"};
-        Process proc;
-        try {
-            proc = Runtime.getRuntime().exec(arguments);// 执行py文件
-            //用输入输出流来截取结果
-            BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
-            String line = null;
-            //输出结果
-            while ((line = in.readLine()) != null) {
-                System.out.println(line);
-            }
-            in.close();
-            //waitFor是用来显示脚本是否运行成功，1表示失败，0表示成功，还有其他的表示其他错误
-            int re = proc.waitFor();
-            System.out.println(re);
-        } catch (IOException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @GetMapping("excel")
-    public Result getExcelData() throws IOException {
-        return Result.error();
-    }
 
 }

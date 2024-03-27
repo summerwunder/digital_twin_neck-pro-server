@@ -29,9 +29,11 @@ public class MqttProperties {
     @Value("${mqtt.qos}")
     private Integer qos;
 
+    //接收发布数据（订阅）所应该的主题
     @Value("${mqtt.pubTopic}")
     private String[] pubTopic;
 
+    //发布数据应该的主题
     @Value("${mqtt.subTopic}")
     private String subTopic;
 
