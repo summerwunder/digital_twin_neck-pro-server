@@ -4,13 +4,16 @@ package edu.whut.config.websocket;
 import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson2.JSON;
 import com.alibaba.fastjson2.JSONObject;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import edu.whut.constants.HttpStatus;
 import edu.whut.domain.vo.SensorDataVO;
 import edu.whut.exception.ServiceException;
+import edu.whut.mapper.FieldsMapDevicesMapper;
 import edu.whut.mapper.SensorDataMapper;
+import edu.whut.pojo.FieldsMapDevices;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
@@ -47,10 +50,15 @@ public class WebSocketSensorDataServer {
     @Autowired
     private static SensorDataMapper sensorDataMapper;
     @Autowired
+    private static FieldsMapDevicesMapper fieldsMapDevicesMapper;
+    @Autowired
     public void setSensorDataMapper(SensorDataMapper sensorDataMapper) {
         WebSocketSensorDataServer.sensorDataMapper = sensorDataMapper;
     }
-
+    @Autowired
+    public void setFieldsMapDevicesMapper(FieldsMapDevicesMapper fieldsMapDevicesMapper) {
+        WebSocketSensorDataServer.fieldsMapDevicesMapper = fieldsMapDevicesMapper;
+    }
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     @OnOpen
     public void onOpen(Session session, @PathParam("userId")int userId,@PathParam("deviceId")int deviceId){
@@ -154,8 +162,17 @@ public class WebSocketSensorDataServer {
      * 获取SensorData数据并发送
      */
     public void sendSensorData() throws JsonProcessingException {
+        LambdaQueryWrapper<FieldsMapDevices> fieldsMapDevicesLambdaQueryWrapper
+                =new LambdaQueryWrapper<>();
+        fieldsMapDevicesLambdaQueryWrapper.eq(FieldsMapDevices::getDId,this.deviceId);
+        //查询所有该设备存在的传感器字段id
+        List<Integer> sensorIds =
+                fieldsMapDevicesMapper.selectList(fieldsMapDevicesLambdaQueryWrapper)
+                        .stream()
+                .map(FieldsMapDevices::getFId)
+                        .toList();
         List<SensorDataVO> sensorDataList=
-                sensorDataMapper.getLatestSensorDataByDeviceId(this.deviceId);
+                sensorDataMapper.getLatestSensorDataByDeviceId(this.deviceId,sensorIds);
         //log.info("传感器数据--------{}",sensorDataList);
         //如果两次数据一样就不传递
         if(this.sensorDataList.equals(sensorDataList)){

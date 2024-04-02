@@ -1,8 +1,10 @@
 package edu.whut.service;
 
 import edu.whut.domain.dto.SensorDataChartsDTO;
+import edu.whut.domain.dto.UploadDataDTO;
 import edu.whut.domain.vo.QuerySensorDataVO;
 import edu.whut.domain.vo.SensorDataVO;
+import edu.whut.domain.vo.UploadDataVO;
 import edu.whut.pojo.SensorData;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -18,4 +20,6 @@ public interface SensorDataService extends IService<SensorData> {
     List<QuerySensorDataVO> querySensorData(SensorDataChartsDTO sensorDataChartsDTO);
 
     void delDataByDeviceId(Integer deviceId);
+
+    List<UploadDataVO> uploadSensorData(UploadDataDTO uploadDataDTO);
 }

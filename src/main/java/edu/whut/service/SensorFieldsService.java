@@ -22,4 +22,6 @@ public interface SensorFieldsService extends IService<SensorFields> {
     boolean updateSensorField(SensorFieldsUpdateDTO sensorFieldsUpdateDTO);
 
     boolean addSensorField(SensorFieldAddDTO sensorFieldAddDTO);
+
+    void deleteSensorField(Integer sensorId);
 }

@@ -47,13 +47,15 @@ mybatis-plus:
  # reasonable: true
   #supportMethodsArguments: true
   #params: count=countSql
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 mqtt:
   broker: tcp://116.62.209.241:1883
   username: admin
   password: 123
   timeout: 60
   keepAlive: 20
-  qos: 1
+  qos: 0
   pubTopic: data/#
   subTopic: control/1
 

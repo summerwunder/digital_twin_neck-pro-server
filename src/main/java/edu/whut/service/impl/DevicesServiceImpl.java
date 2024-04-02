@@ -136,7 +136,15 @@ public class DevicesServiceImpl extends ServiceImpl<DevicesMapper, Devices>
         Devices devices = devicesMapper.selectOne(lambdaQueryWrapper);
         //代表重复
         if(ObjectUtil.isNotNull(devices)){
-            return 0;
+            //也可能是其他人的设备
+            LambdaQueryWrapper<UserMapDevices> userMapDevicesLambdaQueryWrapper
+                    =new LambdaQueryWrapper<>();
+            userMapDevicesLambdaQueryWrapper.eq(UserMapDevices::getUId,SecurityUtil.getUserId());
+            userMapDevicesLambdaQueryWrapper.eq(UserMapDevices::getDId,devices.getDid());
+            if(ObjectUtil.isNotNull(userMapDevicesMapper.selectOne(userMapDevicesLambdaQueryWrapper))){
+                //说明依旧找到了
+                return 0;
+            }
         }
         Devices device=new Devices();
         //设置插入的设备信息

@@ -8,11 +8,9 @@ import edu.whut.domain.dto.SensorFieldAddDTO;
 import edu.whut.domain.dto.SensorFieldsUpdateDTO;
 import edu.whut.domain.vo.QueryDeviceVO;
 import edu.whut.mapper.AlarmActionsMapper;
+import edu.whut.mapper.SensorDataMapper;
 import edu.whut.mapper.UserMapSensorsMapper;
-import edu.whut.pojo.AlarmActions;
-import edu.whut.pojo.Devices;
-import edu.whut.pojo.SensorFields;
-import edu.whut.pojo.UserMapSensors;
+import edu.whut.pojo.*;
 import edu.whut.response.PageResult;
 import edu.whut.service.SensorFieldsService;
 import edu.whut.mapper.SensorFieldsMapper;
@@ -21,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -42,6 +41,9 @@ public class SensorFieldsServiceImpl extends ServiceImpl<SensorFieldsMapper, Sen
 
     @Autowired
     private UserMapSensorsMapper userMapSensorsMapper;
+
+    @Autowired
+    private SensorDataMapper sensorDataMapper;
     @Override
     public PageResult getPageSensors(String sensorName, Integer pageNum, Integer pageSize) {
         //分页参数
@@ -145,6 +147,39 @@ public class SensorFieldsServiceImpl extends ServiceImpl<SensorFieldsMapper, Sen
         userMapSensors.setSId(sensorFields.getNid()); // 直接使用新插入的传感器字段的nid属性
         userMapSensorsMapper.insert(userMapSensors);
         return true; // 返回 true 表示添加成功
+    }
+
+    /**
+     * 删除传感器字段
+     * @param sensorId
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class) // 添加事务管理，当出现异常时回滚事务
+    public void deleteSensorField(Integer sensorId) {
+        //首先判断删除消息的合理性
+        LambdaQueryWrapper<UserMapSensors> lambdaQueryWrapper
+                =new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(UserMapSensors::getUId,SecurityUtil.getUserId());
+        lambdaQueryWrapper.eq(UserMapSensors::getSId,sensorId);
+        if(ObjectUtil.isNotNull(userMapSensorsMapper.selectOne(lambdaQueryWrapper))){
+            try{
+                //说明合理，并不是违法操作
+                //首先需要剔除传感器字段中的信息
+                mapper.deleteById(sensorId);
+                //删除设备对应传感器的表数据
+                LambdaQueryWrapper<UserMapSensors> deleteWrapper = new LambdaQueryWrapper<>();
+                deleteWrapper.eq(UserMapSensors::getSId,sensorId);
+                userMapSensorsMapper.delete(deleteWrapper);
+                //删除所有传感器的相关数据
+                LambdaQueryWrapper<SensorData> dataLambdaQueryWrapper
+                        =new LambdaQueryWrapper<>();
+                dataLambdaQueryWrapper.eq(SensorData::getFieldId,sensorId);
+                sensorDataMapper.delete(dataLambdaQueryWrapper);
+            }catch (Exception e) {
+                // 发生异常时，进行错误回滚
+                throw new RuntimeException("删除传感器字段发生错误: " + e.getMessage(), e);
+            }
+        }
     }
 }
 

@@ -4,7 +4,9 @@ import cn.hutool.core.util.ObjectUtil;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import edu.whut.domain.dto.SensorDataChartsDTO;
+import edu.whut.domain.dto.UploadDataDTO;
 import edu.whut.domain.vo.QuerySensorDataVO;
+import edu.whut.domain.vo.UploadDataVO;
 import edu.whut.pojo.SensorData;
 import edu.whut.service.SensorDataService;
 import edu.whut.mapper.SensorDataMapper;
@@ -57,6 +59,19 @@ public class SensorDataServiceImpl extends ServiceImpl<SensorDataMapper, SensorD
                 =new LambdaQueryWrapper<>();
         sensorDataLambdaQueryWrapper.eq(SensorData::getDeviceId,deviceId);
         mapper.delete(sensorDataLambdaQueryWrapper);
+    }
+
+    @Override
+    public List<UploadDataVO> uploadSensorData(UploadDataDTO uploadDataDTO) {
+        if(ObjectUtil.isNotNull(uploadDataDTO)){
+            List<UploadDataVO> uploadDataVOList
+                    =mapper.uploadSensorData(
+                            uploadDataDTO.getDeviceId(),uploadDataDTO.getSensorFieldId(),
+                            uploadDataDTO.getDateTimeRange());
+            uploadDataVOList.forEach(item -> item.setSensorName(uploadDataDTO.getSensorFieldName()));
+            return uploadDataVOList;
+        }
+        return null;
     }
 }
 

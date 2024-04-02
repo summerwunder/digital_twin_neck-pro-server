@@ -3,7 +3,9 @@ package edu.whut.controller;
 import cn.hutool.core.util.ObjectUtil;
 import edu.whut.config.mqtt.gateway.MqttGateway;
 import edu.whut.domain.dto.SensorDataChartsDTO;
+import edu.whut.domain.dto.UploadDataDTO;
 import edu.whut.domain.vo.QuerySensorDataVO;
+import edu.whut.domain.vo.UploadDataVO;
 import edu.whut.response.Result;
 import edu.whut.service.SensorDataService;
 import lombok.extern.slf4j.Slf4j;
@@ -42,9 +44,24 @@ public class DataController {
         return Result.success(map);
     }
 
-    @PostMapping("publish")
-    public String publish(@RequestBody String data){
-        gateway.sendToMqtt(data,"topic/1");
-        return "ok";
+    /**
+     * 用于获取既定时间的传感器数据渲染下载表格
+     * @param uploadDataDTO
+     * @return
+     */
+    @PostMapping("upload")
+    public Result getDataList(@RequestBody UploadDataDTO uploadDataDTO){
+        List<UploadDataVO> uploadDataVOList
+                =sensorDataService.uploadSensorData(uploadDataDTO);
+        //返回数据
+        Map<String,Object> map=new HashMap<>();
+        map.put("data",uploadDataVOList);
+        if(ObjectUtil.isEmpty(uploadDataVOList)){
+            map.put("msg","无对应的传感器数据");
+        }else{
+            map.put("msg","成功获取数据");
+            map.put("size",uploadDataVOList.size());
+        }
+        return Result.success(map);
     }
 }

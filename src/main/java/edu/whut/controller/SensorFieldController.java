@@ -13,6 +13,7 @@ import edu.whut.service.FieldsMapDevicesService;
 import edu.whut.service.SensorAlarmRecordsService;
 import edu.whut.service.SensorFieldsService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -61,6 +62,14 @@ public class SensorFieldController {
         }else{
             return Result.success("更新失败");
         }
+    }
+    /**
+     * 删除传感器字段信息
+     */
+    @DeleteMapping
+    public Result deleteSensorField(@RequestParam Integer sensorId){
+        sensorFieldsService.deleteSensorField(sensorId);
+        return Result.success("删除成功");
     }
     /**
      * 添加传感器字段向设备字段的绑定

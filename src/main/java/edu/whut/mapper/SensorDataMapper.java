@@ -2,6 +2,7 @@ package edu.whut.mapper;
 
 import edu.whut.domain.vo.QuerySensorDataVO;
 import edu.whut.domain.vo.SensorDataVO;
+import edu.whut.domain.vo.UploadDataVO;
 import edu.whut.pojo.SensorData;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Param;
@@ -16,9 +17,12 @@ import java.util.List;
 */
 public interface SensorDataMapper extends BaseMapper<SensorData> {
 
-    List<SensorDataVO> getLatestSensorDataByDeviceId(@Param("deviceId")Integer deviceId);
+    List<SensorDataVO> getLatestSensorDataByDeviceId(@Param("deviceId")Integer deviceId,@Param("sensorIds") List<Integer> sensorIds);
 
     List<QuerySensorDataVO> querySensorData(@Param("deviceId") Integer deviceId, @Param("sensorId") Integer sensorId);
+
+    List<UploadDataVO> uploadSensorData(@Param("deviceId")Integer deviceId,@Param("sensorFieldId") Integer sensorFieldId,
+                                        @Param("dateTimeRange") List<String> dateTimeRange);
 }
 
 
