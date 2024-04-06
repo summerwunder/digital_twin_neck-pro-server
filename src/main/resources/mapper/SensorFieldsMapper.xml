@@ -30,6 +30,6 @@
         from t_sensor_fields sf
                  right join
              t_user_map_sensors ums on sf.nid = ums.s_id
-        where ums.u_id = #{userId}
+        where sf.is_deleted=0 and ums.u_id = #{userId}
     </select>
 </mapper>
