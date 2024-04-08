@@ -13,7 +13,11 @@ import edu.whut.domain.dto.RegisterUserDTO;
 import edu.whut.domain.vo.LoginUserVO;
 import edu.whut.domain.vo.UserInfoVO;
 import edu.whut.exception.ServiceException;
+import edu.whut.mapper.DevicesMapper;
+import edu.whut.mapper.UserMapDevicesMapper;
+import edu.whut.pojo.Devices;
 import edu.whut.pojo.User;
+import edu.whut.pojo.UserMapDevices;
 import edu.whut.service.UserService;
 import edu.whut.mapper.UserMapper;
 import edu.whut.utils.JwtHelper;
@@ -31,6 +35,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -50,7 +55,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Autowired
     private UserMapper userMapper;
     @Autowired
+    private DevicesMapper devicesMapper;
+    @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserMapDevicesMapper userMapDevicesMapper;
     @Override
     public String checkUserPwd(LoginUserDTO loginUser, HttpServletRequest request) {
         UsernamePasswordAuthenticationToken authentication
@@ -79,6 +88,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         wrapper.eq(User::getUserName,
                 principal.getSysUser().getUserName());
         userMapper.update(updateUser,wrapper);
+        //此时需要将所有的所属的所有设备都设置为离线状态
+        LambdaQueryWrapper<UserMapDevices> userMapDevicesLambdaQueryWrapper
+                =new LambdaQueryWrapper<>();
+        userMapDevicesLambdaQueryWrapper.
+                eq(UserMapDevices::getUId,principal.getSysUser().getUid());
+        //获取所有设备id
+        List<Integer> ids=
+                userMapDevicesMapper.selectList(userMapDevicesLambdaQueryWrapper).stream()
+                        .map(item->item.getDId()).toList();
+        Devices devices=new Devices();
+        devices.setDStatus(0);
+        LambdaQueryWrapper<Devices> devicesLambdaQueryWrapper
+                =new LambdaQueryWrapper<>();
+        devicesLambdaQueryWrapper.in(Devices::getDid,ids);
+        //更新为不在线状态
+        devicesMapper.update(devices,devicesLambdaQueryWrapper);
         return token;
     }
 

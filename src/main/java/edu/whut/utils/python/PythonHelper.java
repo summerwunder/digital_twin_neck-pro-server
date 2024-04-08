@@ -1,3 +1,4 @@
+
 package edu.whut.utils.python;
 
 import edu.whut.constants.ConnectConstants;
@@ -7,13 +8,19 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+
 /**
  * 执行python脚本，向远程服务器发送请求
  * 输入参数：力传感器数值
  * 返回值：是否成功运行脚本
  */
+
 @Slf4j
 public class PythonHelper {
+    /**
+     * 执行python脚本发送数据信息
+     */
+    /*
     public static boolean sendDgramData(Double forceValue){
 
         String[] arguments=new String[]
@@ -44,4 +51,7 @@ public class PythonHelper {
         }
         return false;
     }
+    */
+
 }
+

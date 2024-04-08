@@ -1,17 +1,17 @@
 package edu.whut.config.mqtt;
 
 import cn.hutool.core.util.ObjectUtil;
-import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONException;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.whut.config.mqtt.gateway.MqttGateway;
+import edu.whut.config.websocket.WebSocketExcelServer;
+import edu.whut.constants.ConnectConstants;
 import edu.whut.exception.ServiceException;
 import edu.whut.mapper.*;
 import edu.whut.pojo.*;
-import edu.whut.utils.python.PythonHelper;
 import edu.whut.utils.security.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +22,7 @@ import org.springframework.messaging.MessageHandler;
 import org.springframework.messaging.MessagingException;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Date;
@@ -30,6 +31,8 @@ import java.util.List;
 @Component
 @Slf4j
 public class MqttSubHandler {
+    @Autowired
+    private WebSocketExcelServer webSocketExcelServer;
     @Autowired
     private SensorDataMapper  dataMapper;
     @Autowired
@@ -139,14 +142,18 @@ public class MqttSubHandler {
                         Devices devices=new Devices();
                         devices.setUpdateTime(LocalDateTime.now());
                         devices.setDid(data.getDeviceId());
+                        //同时需要将设备设置为在线状态
+                        devices.setDStatus(1);
                         devicesMapper.updateById(devices);
                         //TODO 此处将数据信息发送至SOCKET
                         //此处默认只传送力传感器的数据，后续需要重新设计表数据
-                        if(data.getFieldId().equals(3)){
+/*                        if(data.getFieldId().equals(3)){
                             invokePython(data.getValueNum());
-                        }
+                        }*/
                     }
                 } catch (JsonProcessingException e) {
+                    throw new RuntimeException(e);
+                } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
             }
@@ -204,11 +211,11 @@ public class MqttSubHandler {
      * 执行python脚本，向远程服务器发送数据
      * @param val
      */
-    public void invokePython(Double val){
+    /* public void invokePython(Double val){
         log.info("force  == {}",val);
         //此处将力传感器数据送至python执行socket代码
         if(PythonHelper.sendDgramData(val)){
             log.info("运行python脚本成功");
         }
-    }
+    }*/
 }

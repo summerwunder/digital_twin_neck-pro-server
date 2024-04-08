@@ -1,9 +1,11 @@
 package edu.whut.config.websocket;
 
 import cn.hutool.core.util.ObjectUtil;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.whut.constants.ConnectConstants;
 import edu.whut.constants.HttpStatus;
+import edu.whut.domain.vo.SensorDataVO;
 import edu.whut.exception.ServiceException;
 import edu.whut.mapper.SensorDataMapper;
 import edu.whut.pojo.DotInfo;
@@ -21,8 +23,14 @@ import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 @Component
 @Slf4j
@@ -34,15 +42,29 @@ public class WebSocketExcelServer {
     private Integer userId;
 
     private Integer deviceId;
-    public static ConcurrentHashMap<Integer,WebSocketExcelServer> webSocketMap
+    public  ConcurrentHashMap<Integer,WebSocketExcelServer> webSocketMap
             =new ConcurrentHashMap<>();
 
     @Autowired
     private static ResourceLoader resourceLoader;
+
+    //保存上一次的数据
+    private List<SensorDataVO> sensorDataList=new ArrayList<>();
+
+    //WebSocket需要如此自动注入
+    @Autowired
+    private static SensorDataMapper sensorDataMapper;
     @Autowired
     public void setResourceLoader(ResourceLoader resourceLoader) {
         WebSocketExcelServer.resourceLoader = resourceLoader;
     }
+
+    @Autowired
+    public void setSensorDataMapper(SensorDataMapper sensorDataMapper) {
+        WebSocketExcelServer.sensorDataMapper = sensorDataMapper;
+    }
+
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
     @OnOpen
     public void onOpen(Session session, @PathParam("userId")
                     int userId,@PathParam("deviceId")int deviceId){
@@ -61,10 +83,56 @@ public class WebSocketExcelServer {
             //加入set中
             webSocketMap.put(userId,this);
             try {
-                this.sendWebInfo();
+                this.sendWebInfo(null);
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }
+        /**
+         * 按照一定事件发送消息
+         */
+        scheduler.scheduleAtFixedRate(() -> {
+
+            //TODO 固定为指定力传感器发送数据，后期会修改
+
+            List<SensorDataVO> latestSensorData =
+                    sensorDataMapper.getLatestSensorDataByDeviceId(deviceId, Arrays.asList(13));
+            log.warn("data----{}",latestSensorData);
+            if (sensorDataList.equals(latestSensorData)) {
+                //说明数据未更新
+                return;
+            }else{
+                //说明数据更新
+                this.sensorDataList=latestSensorData;
+                //更新模型
+                if(latestSensorData.size()==1){
+                    Double sensorValue = latestSensorData.get(0).getValueNum();
+                    try {
+                        //发送网格数据
+                        sendExcel(sensorValue);
+                    } catch (JsonProcessingException e) {
+                        log.error(e.getMessage());
+                        throw new RuntimeException(e);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        },
+        0, 2, TimeUnit.SECONDS);
+    }
+
+    private void sendExcel(Double sensorValue) throws IOException {
+        if(sensorValue<=0.3){
+            sendWebInfo("classpath:0.2n.xlsx");
+        }else if(sensorValue<=0.6){
+            sendWebInfo("classpath:0.5n.xlsx");
+        }else if(sensorValue<=1.0){
+            sendWebInfo("classpath:0.8n.xlsx");
+        }else if(sensorValue<=1.4){
+            sendWebInfo("classpath:1.2n.xlsx");
+        }else{
+            sendWebInfo("classpath:1.6n.xlsx");
         }
     }
 
@@ -109,8 +177,13 @@ public class WebSocketExcelServer {
      * 发送数据的主要函数
      * @throws IOException
      */
-    public void sendWebInfo() throws IOException {
-        Resource resource = resourceLoader.getResource(ConnectConstants.excelPath);
+    public void sendWebInfo(String path) throws IOException {
+        Resource resource=null;
+        if(ObjectUtil.isNull(path)){
+            resource = resourceLoader.getResource(ConnectConstants.excelPath);
+        }else{
+            resource = resourceLoader.getResource(path);
+        }
         File file = resource.getFile();
         //获取点云数据
         List<DotInfo> dots= ExcelReaderUtils.getDotInfoList(file);
